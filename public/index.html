@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Logowanie do gry</title>
+</head>
+<body>
+  <h1>Gra 1v1 – Logowanie</h1>
+
+  <div id="status"></div>
+
+  <h2>Zaloguj się</h2>
+  <form id="login-form">
+    <input type="text" name="username" placeholder="Login" required>
+    <input type="password" name="password" placeholder="Hasło" required>
+    <button type="submit">Zaloguj</button>
+  </form>
+
+  <h2>Zarejestruj się</h2>
+  <form id="register-form">
+    <input type="text" name="username" placeholder="Nowy login" required>
+    <input type="password" name="password" placeholder="Hasło" required>
+    <button type="submit">Zarejestruj</button>
+  </form>
+
+  <h2>Zresetuj hasło</h2>
+  <form id="reset-form">
+    <input type="text" name="username" placeholder="Login" required>
+    <button type="submit">Zresetuj (hasło: 1234)</button>
+  </form>
+
+  <script>
+    const status = document.getElementById('status');
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zalogowano!';
+        window.location.href = '/menu.html'; // Przejście do strony z pokojami
+      } else {
+        status.innerText = 'Błąd logowania.';
+      }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zarejestrowano! Możesz się zalogować.';
+      } else {
+        status.innerText = 'Błąd rejestracji.';
+      }
+    });
+
+    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/reset', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zresetowano hasło! Nowe: 1234';
+      } else {
+        status.innerText = 'Błąd resetu hasła.';
+      }
+    });
+  </script>
+</body>
+</html>

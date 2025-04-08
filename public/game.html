@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Gra – klikaj!</title>
+</head>
+<body>
+  <h1>Gra 1v1</h1>
+  <p id="room-info"></p>
+  <p id="status">Oczekiwanie na przeciwnika...</p>
+
+  <button id="click-btn" disabled>Kliknij!</button>
+  <p>Twoje kliknięcia: <span id="my-clicks">0</span></p>
+  <p>Przeciwnik: <span id="enemy-clicks">0</span></p>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const roomCode = new URLSearchParams(window.location.search).get('code');
+
+    const status = document.getElementById('status');
+    const clickBtn = document.getElementById('click-btn');
+    const myClicksEl = document.getElementById('my-clicks');
+    const enemyClicksEl = document.getElementById('enemy-clicks');
+    const roomInfo = document.getElementById('room-info');
+
+    let myClicks = 0;
+    let enemyClicks = 0;
+    let gameOver = false;
+
+    roomInfo.innerText = `Kod pokoju: ${roomCode}`;
+    socket.emit('join-room', roomCode);
+
+    socket.on('waiting-for-opponent', () => {
+    status.innerText = 'Oczekiwanie na przeciwnika...';
+    });
+
+    socket.on('game-start', () => {
+    status.innerText = 'Przeciwnik dołączył! Gra się zaczyna!';
+    clickBtn.disabled = false;
+    });
+
+
+    clickBtn.addEventListener('click', () => {
+      if (gameOver) return;
+
+      myClicks++;
+      myClicksEl.innerText = myClicks;
+      socket.emit('click', { roomCode, clicks: myClicks });
+
+      if (myClicks === 10) {
+        status.innerText = 'Wygrałeś! Czekamy 5 sekund...';
+        gameOver = true;
+        clickBtn.disabled = true;
+
+        socket.emit('game-over', { roomCode });
+        setTimeout(() => {
+          alert('Gra zakończona!');
+          // Tu można wysłać wynik do backendu itd.
+        }, 5000);
+      }
+    });
+
+    socket.on('opponent-clicked', (clicks) => {
+      enemyClicks = clicks;
+      enemyClicksEl.innerText = clicks;
+    });
+
+    socket.on('game-ended', () => {
+      if (!gameOver) {
+        status.innerText = 'Przegrałeś! Masz 5 sekund na dokończenie...';
+        clickBtn.disabled = false;
+
+        gameOver = true;
+        setTimeout(() => {
+          clickBtn.disabled = true;
+          alert('Gra zakończona!');
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Menu gry</title>
+</head>
+<body>
+  <h1>Witaj w grze 1v1</h1>
+
+  <div id="status"></div>
+
+  <button id="create-room">Utwórz pokój</button>
+
+  <h3>Lub dołącz do istniejącego pokoju</h3>
+  <form id="join-form">
+    <input type="text" name="code" placeholder="Kod pokoju" required maxlength="6">
+    <button type="submit">Dołącz</button>
+  </form>
+  <button id="logout">Wyloguj</button>
+
+  <script>
+    const status = document.getElementById('status');
+
+    // Sprawdź, czy użytkownik jest zalogowany
+    (async () => {
+    const res = await fetch('/session/check');
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+      alert('Musisz być zalogowany!');
+      window.location.href = '/index.html';
+    } else {
+      status.innerText = `Zalogowany jako: ${data.username}`;
+    }
+    })();
+
+    document.getElementById('create-room').addEventListener('click', async () => {
+      const res = await fetch('/room/create', { method: 'POST' });
+      const data = await res.json();
+
+      if (data.success) {
+        // Tu można przekierować do strony gry: np. /game.html?code=XYZ123
+        window.location.href = `/game.html?code=${data.code}`;
+      } else {
+        status.innerText = 'Nie udało się utworzyć pokoju.';
+      }
+    });
+
+    document.getElementById('join-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/room/join', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        status.innerText = 'Dołączono do pokoju!';
+        // Tu można przekierować do gry
+        window.location.href = `/game.html?code=${formData.get('code')}`;
+      } else {
+        status.innerText = 'Błąd: Nie udało się dołączyć do pokoju.';
+      }
+    });
+
+    document.getElementById('logout').addEventListener('click', async () => {
+    await fetch('/auth/logout', { method: 'POST' });
+    window.location.href = '/index.html';
+    });
+
+  </script>
+</body>
+</html>
