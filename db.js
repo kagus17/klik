@@ -18,9 +18,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: 3306,
-  ssl: {
-    ca: process.env.DB_SSL_CA,  // pobieramy certyfikat SSL z zmiennej środowiskowej
-  }
+  ssl: true
 });
 
 module.exports = pool.promise();
