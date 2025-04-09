@@ -8,17 +8,15 @@ const pool = mysql.createPool({
 });
 
 module.exports = pool.promise();*/
+
 const mysql = require('mysql2');
+require('dotenv').config(); // wczytuje plik .env
 
 const pool = mysql.createPool({
-  host: 'klik2-db.mysql.database.azure.com',
-  user: 'klikUser@klik2-db.mysql.database.azure.com', // Uwaga: musi zawierać @nazwa_serwera!
-  password: 'Pass123!',
-  database: 'klikgra', // lub jak nazwałeś swoją bazę
-  port: 3306,
-  ssl: {
-    rejectUnauthorized: true
-  }
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 module.exports = pool.promise();
