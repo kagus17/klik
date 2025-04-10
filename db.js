@@ -1,4 +1,4 @@
-const mysql = require('mysql2');
+/*const mysql = require('mysql2');
 
 const pool = mysql.createPool({
   host: 'localhost',
@@ -7,9 +7,13 @@ const pool = mysql.createPool({
   database: 'gra1v1'
 });
 
-module.exports = pool.promise();
+module.exports = pool.promise();*/
 
-/*const fs = require('fs');
+<<<<<<< HEAD
+const fs = require('fs');
+=======
+const fs = require('fs');
+>>>>>>> e96001faa0f0c61a99dae7f55fee5eb94763945f
 const path = require('path');
 const mysql = require('mysql2');
 require('dotenv').config(); // wczytuje plik .env
@@ -25,5 +29,5 @@ const pool = mysql.createPool({
   }
 });
 
-module.exports = pool.promise();*/
+module.exports = pool.promise();
 
