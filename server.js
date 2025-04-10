@@ -37,19 +37,25 @@ io.on('connection', (socket) => {
 
     rooms[roomCode].push(socket.id);
 
-    if (rooms[roomCode].length === 2) {
-      io.to(roomCode).emit('game-start'); // start gry dla obu
-    } else {
-      socket.emit('waiting-for-opponent'); // tylko pierwszy czeka
-    }
+    // Powiadom pierwszego gracza o kodzie pokoju
+    if (rooms[roomCode].length === 1) {
+      io.to(socket.id).emit('room-created', roomCode);
+  }
 
-    socket.on('disconnect', () => {
+  if (rooms[roomCode].length === 2) {
+      io.to(roomCode).emit('game-start');
+  }
+
+  socket.on('disconnect', () => {
       rooms[roomCode] = rooms[roomCode].filter(id => id !== socket.id);
       if (rooms[roomCode].length === 0) {
-        delete rooms[roomCode];
+          delete rooms[roomCode];
+      } else {
+          // Powiadom pozostałego gracza o rozłączeniu przeciwnika
+          io.to(roomCode).emit('opponent-disconnected');
       }
-    });
   });
+});
 
   socket.on('click', ({ roomCode, clicks }) => {
     socket.to(roomCode).emit('opponent-clicked', clicks);
@@ -64,7 +70,7 @@ app.get('/', (req, res) => {
   res.send('Serwer działa!');
 });
 
-server.listen(8080, () => console.log('Serwer + Socket.IO działa na http://localhost:3000'));
+server.listen(3000, () => console.log('Serwer + Socket.IO działa na http://localhost:3000'));
 
 app.get('/session/check', (req, res) => {
     if (req.session.user) {

@@ -40,7 +40,7 @@
 
       if (data.success) {
         // Tu można przekierować do strony gry: np. /game.html?code=XYZ123
-        window.location.href = `/game.html?code=${data.code}`;
+        window.location.href = `/game2.html?code=${data.code}`;
       } else {
         status.innerText = 'Nie udało się utworzyć pokoju.';
       }
@@ -59,7 +59,7 @@
       if (data.success) {
         status.innerText = 'Dołączono do pokoju!';
         // Tu można przekierować do gry
-        window.location.href = `/game.html?code=${formData.get('code')}`;
+        window.location.href = `/game2.html?code=${formData.get('code')}`;
       } else {
         status.innerText = 'Błąd: Nie udało się dołączyć do pokoju.';
       }
