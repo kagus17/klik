@@ -9,11 +9,8 @@ const pool = mysql.createPool({
 
 module.exports = pool.promise();*/
 
-<<<<<<< HEAD
+
 const fs = require('fs');
-=======
-const fs = require('fs');
->>>>>>> e96001faa0f0c61a99dae7f55fee5eb94763945f
 const path = require('path');
 const mysql = require('mysql2');
 require('dotenv').config(); // wczytuje plik .env
