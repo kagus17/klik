@@ -55,7 +55,7 @@ class MixOrMatch {
             socket.emit('join-room', this.roomCode);
             
             socket.on('game-start', () => {
-                document.querySelector('.overlay-text.visible').classList.remove('visible');
+                //document.querySelector('.overlay-text.visible').classList.remove('visible');
                 this.startGame();
             });
             
@@ -64,6 +64,7 @@ class MixOrMatch {
             });
             
             socket.on('game-ended', () => {
+                document.getElementById('game-over-text').classList.add('visible');
                 setTimeout(() => {
                     window.location.href = '/menu.html';
                 }, 5000);
@@ -140,6 +141,7 @@ class MixOrMatch {
         
         if (this.isMultiplayer) {
             socket.emit('game-over', { roomCode: this.roomCode });
+            document.getElementById('game-over-text').classList.add('visible');
             setTimeout(() => {
                 window.location.href = '/menu.html';
             }, 5000);

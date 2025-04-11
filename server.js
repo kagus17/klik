@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
     socket.to(roomCode).emit('opponent-clicked', clicks);
   });
 
-  socket.on('game-over', ({ roomCode }) => {
+  socket.on('game-over', ({ roomCode}) => {
     socket.to(roomCode).emit('game-ended');
   });
 });
@@ -70,7 +70,7 @@ app.get('/', (req, res) => {
   res.send('Serwer działa!');
 });
 
-server.listen(3000, () => console.log('Serwer + Socket.IO działa na http://localhost:3000'));
+server.listen(8080, () => console.log('Serwer + Socket.IO działa na http://localhost:3000'));
 
 app.get('/session/check', (req, res) => {
     if (req.session.user) {

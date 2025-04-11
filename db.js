@@ -7,7 +7,7 @@ const pool = mysql.createPool({
   database: 'gra1v1'
 });
 
-module.exports = pool.promise();*/
+module.exports = pool.promise(); */
 
 
 const fs = require('fs');
