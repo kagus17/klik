@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
     socket.to(roomCode).emit('opponent-clicked', clicks);
   });
 
-  socket.on('game-over', ({ roomCode }) => {
+  socket.on('game-over', ({ roomCode}) => {
     socket.to(roomCode).emit('game-ended');
   });
 });
