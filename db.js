@@ -21,7 +21,7 @@ const pool = mysql.createPool({
   ssl: {
     ca: fs.readFileSync(path.join(__dirname, 'certs', 'DigiCertGlobalRootCA.crt.pem'))
   }
-});
+});*/
 
-module.exports = pool.promise();*/
+module.exports = pool.promise();
 

@@ -55,6 +55,8 @@ class MixOrMatch {
             socket.emit('join-room', this.roomCode);
             
             socket.on('game-start', () => {
+                this.totalTime=100;
+                this.timeRemaining = this.totalTime;
                 //document.querySelector('.overlay-text.visible').classList.remove('visible');
                 this.startGame();
             });
