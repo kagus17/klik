@@ -23,45 +23,10 @@
       <button type="submit" class="btn">Odzyskaj</button>
     </form>
 
-    
-
-  
-
   <div id="status"></div>
 
   <script>
     const status = document.getElementById('status');
-
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const res = await fetch('/auth/login', {
-        method: 'POST',
-        body: new URLSearchParams(formData)
-      });
-
-      if (res.ok) {
-        status.innerText = 'Zalogowano!';
-        window.location.href = 'menu.html';
-      } else {
-        status.innerText = 'Błąd logowania.';
-      }
-    });
-
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const res = await fetch('/auth/register', {
-        method: 'POST',
-        body: new URLSearchParams(formData)
-      });
-
-      if (res.ok) {
-        status.innerText = 'Zarejestrowano! Możesz się zalogować.';
-      } else {
-        status.innerText = 'Błąd rejestracji.';
-      }
-    });
 
     document.getElementById('reset-form').addEventListener('submit', async (e) => {
       e.preventDefault();

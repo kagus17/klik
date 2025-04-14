@@ -55,12 +55,13 @@ body {
   }
   
   .input-space input{
+    box-shadow: inset 0 0 3px #CDCFD1;
     width: 100%;
     height: 100%;
     background: transparent;
     border: none;
     outline: none;
-    border: 2px solid rgb(133, 133, 128);
+    border: 1px solid #CDCFD1;
     border-radius: 40px;
     font-size: 16px;
     color: white;
@@ -128,6 +129,20 @@ body {
     .background .btn:hover{
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
         color: white;
+  }
+
+  #register-form {
+    display: block;
+    align-items: center; /* Wyśrodkowanie elementów */
+    justify-content: center; /* Wyśrodkowanie elementów w pionie */ 
+    box-sizing: border-box; /* Umożliwia uwzględnienie paddingu w wysokości kontenera */
+  }
+
+  .upper-form {
+    display: flex; /* Umożliwia elastyczne rozmieszczenie elementów */
+    justify-content: space-between; /* Rozmieszczenie elementów w poziomie */
+    align-items: center; /* Wyśrodkowanie elementów w pionie */
+    height: 100%; /* Wysokość kontenera */
   }
 
 /* Stylizacja kontenera logo */
