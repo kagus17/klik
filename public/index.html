@@ -6,7 +6,99 @@
   <title>Logowanie do gry</title>
 </head>
 <body>
-  <h1>Gra 1v1 – Logowanie</h1>
+  
+  <div class="background">
+    
+    <h1>Zaloguj się</h1>
+    <form id="login-form">
+      <div class="input-space">
+        <input type="text" name="username" placeholder="Login" required>
+      </div>
+      <div class="input-space">
+        <input type="password" name="password" placeholder="Hasło" required>
+        <i class='bx bx-lock-open-alt'></i>
+      </div>
+      <button type="submit" class="btn">Zaloguj</button>
+    </form>
+    <div class="forgot-password">
+      Nie pamiętasz hasła? <a href="#"><b>Przypomnij</b></a>
+    </div>
+  </div>
+  <div class="logo-container">
+    <img src="logo.png" alt="Logo" class="logo-img">
+</div>
+
+  <div class="register background">
+    <h1>Rejestracja</h1>
+    <form id="register-form">
+      <div class="input-space">
+        <input type="text" name="username" placeholder="Login" required>
+      </div>
+      <div class="input-space">
+        <input type="password" name="password" placeholder="Hasło" required>
+        <i class='bx bx-lock-open-alt'></i>
+      </div>
+      <button type="submit" class="btn">Zarejestruj</button>
+    </form>
+  </div>
+  
+
+  <div id="status"></div>
+
+  <script>
+    const status = document.getElementById('status');
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zalogowano!';
+        window.location.href = 'menu.html';
+      } else {
+        status.innerText = 'Błąd logowania.';
+      }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zarejestrowano! Możesz się zalogować.';
+      } else {
+        status.innerText = 'Błąd rejestracji.';
+      }
+    });
+
+    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/reset', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zresetowano hasło! Nowe: 1234';
+      } else {
+        status.innerText = 'Błąd resetu hasła.';
+      }
+    });
+  </script>
+</body>
+</html>
+<!--<body>
+  <div class="background"></div>
+    <h1>Gra 1v1 – Logowanie</h1>
 
     <div id="status"></div>
 
@@ -80,4 +172,4 @@
       });
     </script>
   </div>
-</body>
+</body>-->
