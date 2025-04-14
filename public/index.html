@@ -60,8 +60,7 @@
       });
 
       if (res.ok) {
-        status.innerText = 'Zalogowano!';
-        window.location.href = 'menu.html';
+        window.location.href = '/menu.html'; // Przejście do strony z pokojami
       } else {
         status.innerText = 'Błąd logowania.';
       }

@@ -136,6 +136,7 @@ body {
     align-items: center; /* Wyśrodkowanie elementów */
     justify-content: center; /* Wyśrodkowanie elementów w pionie */ 
     box-sizing: border-box; /* Umożliwia uwzględnienie paddingu w wysokości kontenera */
+    padding: 2px;
   }
 
   .upper-form {
@@ -143,6 +144,9 @@ body {
     justify-content: space-between; /* Rozmieszczenie elementów w poziomie */
     align-items: center; /* Wyśrodkowanie elementów w pionie */
     height: 100%; /* Wysokość kontenera */
+    margin-bottom: 30px;
+    gap: 20px; /* <-- DODANE */
+
   }
 
 /* Stylizacja kontenera logo */
