@@ -53,6 +53,14 @@ class MixOrMatch {
         this.busy = false;
 
         if (this.isMultiplayer) {
+            socket.on('time-update', ({ timeRemaining }) => {
+                this.timeRemaining = timeRemaining;
+                this.timer.innerText = this.timeRemaining;
+
+                if (this.timeRemaining <= 0) {
+                    this.gameOver();
+                }
+            });
             // Dodaj nasłuchiwanie na zdarzenie 'opponent-clicked'
             
             socket.on('opponent-clicked', (clicks) => {
@@ -70,14 +78,12 @@ class MixOrMatch {
 
     startGame() {
         this.totalClicks = 0;
-        this.timeRemaining = this.totalTime;
         this.cardToCheck = null;
         this.matchedCards = [];
         this.busy = true;
         setTimeout(() => {
             this.audioController.startMusic();
             this.shuffleCards(this.cardsArray);
-            this.countdown = this.startCountdown();
             this.busy = false;
         }, 500)
         this.hideCards();
@@ -85,12 +91,13 @@ class MixOrMatch {
         this.ticker.innerText = this.totalClicks;
     }
     startCountdown() {
-        return setInterval(() => {
+        return /*setInterval(() => {
             this.timeRemaining--;
             this.timer.innerText = this.timeRemaining;
             if(this.timeRemaining === 0)
                 this.gameOver();
-        }, 1000);
+        }, 1000);*/
+        null
     }
     gameOver() {
         clearInterval(this.countdown);

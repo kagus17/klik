@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
     socket.join(roomCode);
 
     if (!rooms[roomCode]) {
-      rooms[roomCode] = { players: [], difficulty: difficulty };
+      rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: difficulty === 'hard' ? 60 : 100 };
     }
 
     rooms[roomCode].players.push(socket.id);
@@ -45,6 +45,18 @@ io.on('connection', (socket) => {
   // Gdy dwóch graczy dołączy, rozpocznij grę
   if (rooms[roomCode].players.length === 2) {
     io.to(roomCode).emit('game-start', { difficulty: rooms[roomCode].difficulty });
+
+    // Rozpocznij odliczanie czasu gry
+    rooms[roomCode].interval = setInterval(() => {
+      rooms[roomCode].timeRemaining--;
+      io.to(roomCode).emit('time-update', { timeRemaining: rooms[roomCode].timeRemaining });
+
+      if (rooms[roomCode].timeRemaining <= 0) {
+        clearInterval(rooms[roomCode].interval);
+        io.to(roomCode).emit('game-ended');
+      }
+    }, 1000);
+    
   }
 
   socket.on('disconnect', () => {
