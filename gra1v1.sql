@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 15, 2025 at 04:42 PM
+-- Generation Time: Apr 15, 2025 at 05:30 PM
 -- Wersja serwera: 10.4.32-MariaDB
 -- Wersja PHP: 8.2.12
 
@@ -37,6 +37,8 @@ CREATE TABLE `level_easy_score` (
   `czas_trwania_sekundy` int(11) DEFAULT NULL,
   `card_moves` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 --
 -- Struktura tabeli dla tabeli `level_hard_score`
@@ -101,16 +103,17 @@ INSERT INTO `rooms` (`id`, `code`, `player1_id`, `player2_id`, `created_at`) VAL
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL
+  `password` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`) VALUES
-(2, 'test1', '$2b$10$z3uG2VPgRWEKBf/wwqfJSe0TEfCx9zQS9P6pMb6phY7wsdaW77OwK'),
-(4, 'test2', '$2b$10$iROOctfdSBXxuNL2GyA0IezrJPC5BCog1luYCbKWDqwLOwIlIvRSK');
+INSERT INTO `users` (`id`, `username`, `password`, `email`) VALUES
+(2, 'test1', '$2b$10$z3uG2VPgRWEKBf/wwqfJSe0TEfCx9zQS9P6pMb6phY7wsdaW77OwK', ''),
+(4, 'test2', '$2b$10$iROOctfdSBXxuNL2GyA0IezrJPC5BCog1luYCbKWDqwLOwIlIvRSK', '');
 
 --
 -- Indeksy dla zrzutów tabel
