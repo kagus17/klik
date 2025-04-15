@@ -16,12 +16,11 @@
       </div>
       <div class="input-space">
         <input type="password" name="password" placeholder="Hasło" required>
-        <i class='bx bx-lock-open-alt'></i>
       </div>
       <button type="submit" class="btn">Zaloguj</button>
     </form>
     <div class="forgot-password">
-      Nie pamiętasz hasła? <a href="#"><b>Przypomnij</b></a>
+      Nie pamiętasz hasła? <a href="recovery_passwd.html"><b>Przypomnij</b></a>
     </div>
   </div>
   <div class="logo-container">
@@ -32,11 +31,15 @@
     <h1>Rejestracja</h1>
     <form id="register-form">
       <div class="input-space">
+        <div class="upper-form">
         <input type="text" name="username" placeholder="Login" required>
+        <input type="password" name="password" placeholder="Hasło" required>
       </div>
       <div class="input-space">
-        <input type="password" name="password" placeholder="Hasło" required>
-        <i class='bx bx-lock-open-alt'></i>
+      </div>
+      </div>
+      <div class="input-space" id="email">
+        <input type="text" name="Email" placeholder="Email" required>
       </div>
       <button type="submit" class="btn">Zarejestruj</button>
     </form>
@@ -57,8 +60,7 @@
       });
 
       if (res.ok) {
-        status.innerText = 'Zalogowano!';
-        window.location.href = 'menu.html';
+        window.location.href = '/menu.html'; // Przejście do strony z pokojami
       } else {
         status.innerText = 'Błąd logowania.';
       }

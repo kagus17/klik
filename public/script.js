@@ -43,6 +43,7 @@ class MixOrMatch {
         this.opponentFlips = document.getElementById('opponent-flips') || { innerText: '0' }; // Fallback
         this.audioController = new AudioController();
         this.roomCode = new URLSearchParams(window.location.search).get('code');
+        this.difficulty = new URLSearchParams(window.location.search).get('difficulty'); // Pobierz poziom trudności z URL
         this.isMultiplayer = !!this.roomCode;
         
         // Inicjalizuj wszystkie wymagane właściwości
@@ -52,14 +53,15 @@ class MixOrMatch {
         this.busy = false;
 
         if (this.isMultiplayer) {
-            socket.emit('join-room', this.roomCode);
-            
-            socket.on('game-start', () => {
-                this.totalTime=100;
-                this.timeRemaining = this.totalTime;
-                //document.querySelector('.overlay-text.visible').classList.remove('visible');
-                this.startGame();
+            socket.on('time-update', ({ timeRemaining }) => {
+                this.timeRemaining = timeRemaining;
+                this.timer.innerText = this.timeRemaining;
+
+                if (this.timeRemaining <= 0) {
+                    this.gameOver();
+                }
             });
+            // Dodaj nasłuchiwanie na zdarzenie 'opponent-clicked'
             
             socket.on('opponent-clicked', (clicks) => {
                 this.opponentFlips.innerText = clicks;
@@ -76,14 +78,12 @@ class MixOrMatch {
 
     startGame() {
         this.totalClicks = 0;
-        this.timeRemaining = this.totalTime;
         this.cardToCheck = null;
         this.matchedCards = [];
         this.busy = true;
         setTimeout(() => {
             this.audioController.startMusic();
             this.shuffleCards(this.cardsArray);
-            this.countdown = this.startCountdown();
             this.busy = false;
         }, 500)
         this.hideCards();
@@ -91,12 +91,13 @@ class MixOrMatch {
         this.ticker.innerText = this.totalClicks;
     }
     startCountdown() {
-        return setInterval(() => {
+        return /*setInterval(() => {
             this.timeRemaining--;
             this.timer.innerText = this.timeRemaining;
             if(this.timeRemaining === 0)
                 this.gameOver();
-        }, 1000);
+        }, 1000);*/
+        null
     }
     gameOver() {
         clearInterval(this.countdown);
@@ -213,6 +214,7 @@ if (document.readyState == 'loading') {
 function ready() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomCode = urlParams.get('code');
+    const difficulty = urlParams.get('difficulty'); // Pobierz poziom trudności z URL
     
     if (roomCode) {
         const waitingOverlay = document.getElementById('waiting-overlay');
@@ -220,15 +222,23 @@ function ready() {
         const waitingMessage = document.getElementById('waiting-message');
         const opponentInfo = document.getElementById('opponent-info');
         
-        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode}`;
+        // Wyświetl kod pokoju i poziom trudności
+        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
         
-        socket.on('room-created', (code) => {
-            roomCodeDisplay.textContent = `Kod pokoju: ${code}`;
+        // Wyślij dane do serwera
+        socket.emit('join-room', { roomCode, difficulty });
+
+        socket.on('room-created', ({ roomCode, difficulty }) => {
+            roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
         });
         
-        socket.on('game-start', () => {
+        socket.on('game-start', ({ difficulty }) => {
             waitingOverlay.classList.remove('visible');
             opponentInfo.style.display = 'block';
+
+            // Rozpocznij grę z odpowiednim poziomem trudności
+            const game = new MixOrMatch(difficulty === 'hard' ? 60 : 100, Array.from(document.getElementsByClassName('card')));
+            game.startGame();
         });
         
         socket.on('opponent-disconnected', () => {
