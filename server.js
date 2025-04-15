@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const sharedSession = require('socket.io-express-session');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
@@ -8,14 +9,36 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+const sessionMiddleware = session({
+  secret: 'tajny-klucz',
+  resave: false,
+  saveUninitialized: false
+});
+
+app.use(sessionMiddleware);
+
+// Udostępnij sesję w Socket.IO
+io.use(sharedSession(sessionMiddleware, {
+  autoSave: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
+/*app.use(session({
   secret: 'tajny-klucz',
   resave: false,
   saveUninitialized: false
 }));
+
+app.use((req, res, next) => {
+  if (req.session.user) {
+    console.log(`Zalogowany użytkownik: ${req.session.user.username}`);
+  } else {
+    console.log('Brak zalogowanego użytkownika');
+  }
+  next();
+});*/
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -35,7 +58,8 @@ io.on('connection', (socket) => {
       rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: difficulty === 'hard' ? 60 : 100 };
     }
 
-    rooms[roomCode].players.push(socket.id);
+    const username = socket.handshake.session?.user?.username || 'Anonim';
+    rooms[roomCode].players.push({ id: socket.id, username });
 
      // Powiadom pierwszego gracza o kodzie pokoju i poziomie trudności
      if (rooms[roomCode].players.length === 1) {
@@ -44,6 +68,13 @@ io.on('connection', (socket) => {
 
   // Gdy dwóch graczy dołączy, rozpocznij grę
   if (rooms[roomCode].players.length === 2) {
+    const player1 = rooms[roomCode].players[0];
+    const player2 = rooms[roomCode].players[1];
+
+    console.log(`Gra rozpoczęta w pokoju ${roomCode}`);
+    console.log(`Gracz 1: ${player1.username}`);
+    console.log(`Gracz 2: ${player2.username}`);
+      
     io.to(roomCode).emit('game-start', { difficulty: rooms[roomCode].difficulty });
 
     // Rozpocznij odliczanie czasu gry
@@ -56,16 +87,18 @@ io.on('connection', (socket) => {
         io.to(roomCode).emit('game-ended');
       }
     }, 1000);
-    
+
   }
 
   socket.on('disconnect', () => {
-    rooms[roomCode].players = rooms[roomCode].players.filter(id => id !== socket.id);
-    if (rooms[roomCode].players.length === 0) {
-      delete rooms[roomCode];
-    } else {
-      // Powiadom pozostałego gracza o rozłączeniu przeciwnika
-      io.to(roomCode).emit('opponent-disconnected');
+    for (const roomCode in rooms) {
+      rooms[roomCode].players = rooms[roomCode].players.filter(player => player.id !== socket.id);
+      if (rooms[roomCode].players.length === 0) {
+        clearInterval(rooms[roomCode].interval);
+        delete rooms[roomCode];
+      } else {
+        io.to(roomCode).emit('opponent-disconnected');
+      }
     }
   });
 });
