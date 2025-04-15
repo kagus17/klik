@@ -65,7 +65,7 @@ io.on('connection', (socket) => {
      if (rooms[roomCode].players.length === 1) {
       io.to(socket.id).emit('room-created', { roomCode, difficulty: rooms[roomCode].difficulty });
     }
-
+    
   // Gdy dwóch graczy dołączy, rozpocznij grę
   if (rooms[roomCode].players.length === 2) {
     const player1 = rooms[roomCode].players[0];
@@ -74,7 +74,12 @@ io.on('connection', (socket) => {
     console.log(`Gra rozpoczęta w pokoju ${roomCode}`);
     console.log(`Gracz 1: ${player1.username}`);
     console.log(`Gracz 2: ${player2.username}`);
-      
+    console.log(`Poziom trudności: ${rooms[roomCode].difficulty}`);
+    
+    // Wyślij nazwę przeciwnika do obu graczy
+    io.to(player1.id).emit('opponent-info', { opponentName: player2.username });
+    io.to(player2.id).emit('opponent-info', { opponentName: player1.username });
+
     io.to(roomCode).emit('game-start', { difficulty: rooms[roomCode].difficulty });
 
     // Rozpocznij odliczanie czasu gry

@@ -34,16 +34,18 @@ class AudioController {
 const socket = io();
 
 class MixOrMatch {
-    constructor(totalTime, cards) {
+    constructor(difficulty,totalTime, cards) {
         this.cardsArray = cards;
         this.totalTime = totalTime;
         this.timeRemaining = totalTime;
         this.timer = document.getElementById('time-remaining');
         this.ticker = document.getElementById('flips');
-        this.opponentFlips = document.getElementById('opponent-flips') || { innerText: '0' }; // Fallback
+        this.opponentFlips = document.getElementById('opponent-flips');
+        this.opponentNameDisplay = document.getElementById('opponent-name');
+        this.difficultyDisplay = document.getElementById('difficulty-display');
         this.audioController = new AudioController();
         this.roomCode = new URLSearchParams(window.location.search).get('code');
-        this.difficulty = new URLSearchParams(window.location.search).get('difficulty'); // Pobierz poziom trudności z URL
+        this.difficulty = difficulty || 'easy'; // Ustaw domyślny poziom trudności na 'easy'
         this.isMultiplayer = !!this.roomCode;
         
         // Inicjalizuj wszystkie wymagane właściwości
@@ -53,6 +55,9 @@ class MixOrMatch {
         this.busy = false;
 
         if (this.isMultiplayer) {
+            // Wyświetl poziom trudności
+            this.difficultyDisplay.innerText = `Poziom trudności: ${this.difficulty}`;
+
             socket.on('time-update', ({ timeRemaining }) => {
                 this.timeRemaining = timeRemaining;
                 this.timer.innerText = this.timeRemaining;
@@ -61,8 +66,11 @@ class MixOrMatch {
                     this.gameOver();
                 }
             });
+            // Nasłuchuj nazwy przeciwnika i aktualizacji odwróceń
+            socket.on('opponent-info', ({ opponentName }) => {
+                this.opponentNameDisplay.innerText = opponentName;
+            });
             // Dodaj nasłuchiwanie na zdarzenie 'opponent-clicked'
-            
             socket.on('opponent-clicked', (clicks) => {
                 this.opponentFlips.innerText = clicks;
             });
@@ -237,7 +245,7 @@ function ready() {
             opponentInfo.style.display = 'block';
 
             // Rozpocznij grę z odpowiednim poziomem trudności
-            const game = new MixOrMatch(difficulty === 'hard' ? 60 : 100, Array.from(document.getElementsByClassName('card')));
+            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, Array.from(document.getElementsByClassName('card')));
             game.startGame();
         });
         
