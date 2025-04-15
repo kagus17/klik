@@ -37,7 +37,8 @@ CREATE TABLE `level_easy_score` (
   `czas_trwania_sekundy` int(11) DEFAULT NULL,
   `card_moves` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+--
+-- Dumping data for table `level_easy_score`
 -- --------------------------------------------------------
 
 --
