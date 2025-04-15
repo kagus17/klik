@@ -2,18 +2,23 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="menu_main.css">
   <title>Menu gry</title>
 </head>
 <body>
-
-  <div class="background">
-
   <h1>Witaj w grze 1v1</h1>
 
   <div id="status"></div>
 
   <button id="create-room">Utwórz pokój</button>
+<div class="difficulty-select">
+<h3></h3>
+  <label for="difficulty">Wybierz poziom trudności:</label>
+  <select id="difficulty">
+    <option value="easy">Łatwy</option>
+    <option value="medium" selected>Średni</option>
+    <option value="hard">Trudny</option>
+  </select>
+</div>
 
   <h3>Lub dołącz do istniejącego pokoju</h3>
   <form id="join-form">
@@ -39,12 +44,13 @@
     })();
 
     document.getElementById('create-room').addEventListener('click', async () => {
+      const difficulty = document.getElementById('difficulty').value; // Pobierz wybrany poziom trudności
       const res = await fetch('/room/create', { method: 'POST' });
       const data = await res.json();
 
       if (data.success) {
         // Tu można przekierować do strony gry: np. /game.html?code=XYZ123
-        window.location.href = `/game2.html?code=${data.code}`;
+        window.location.href = `/game2.html?code=${data.code}&difficulty=${difficulty}`; // Dodaj poziom trudności do URL
       } else {
         status.innerText = 'Nie udało się utworzyć pokoju.';
       }
@@ -75,6 +81,5 @@
     });
 
   </script>
-  </div>
 </body>
 </html>

@@ -28,32 +28,33 @@ const rooms = {}; // Przechowuje listy socket.id dla każdego pokoju
 io.on('connection', (socket) => {
   console.log('Połączono:', socket.id);
 
-  socket.on('join-room', (roomCode) => {
+  socket.on('join-room', ({roomCode, difficulty}) => {
     socket.join(roomCode);
 
     if (!rooms[roomCode]) {
-      rooms[roomCode] = [];
+      rooms[roomCode] = { players: [], difficulty: difficulty };
     }
 
-    rooms[roomCode].push(socket.id);
+    rooms[roomCode].players.push(socket.id);
 
-    // Powiadom pierwszego gracza o kodzie pokoju
-    if (rooms[roomCode].length === 1) {
-      io.to(socket.id).emit('room-created', roomCode);
-  }
+     // Powiadom pierwszego gracza o kodzie pokoju i poziomie trudności
+     if (rooms[roomCode].players.length === 1) {
+      io.to(socket.id).emit('room-created', { roomCode, difficulty: rooms[roomCode].difficulty });
+    }
 
-  if (rooms[roomCode].length === 2) {
-      io.to(roomCode).emit('game-start');
+  // Gdy dwóch graczy dołączy, rozpocznij grę
+  if (rooms[roomCode].players.length === 2) {
+    io.to(roomCode).emit('game-start', { difficulty: rooms[roomCode].difficulty });
   }
 
   socket.on('disconnect', () => {
-      rooms[roomCode] = rooms[roomCode].filter(id => id !== socket.id);
-      if (rooms[roomCode].length === 0) {
-          delete rooms[roomCode];
-      } else {
-          // Powiadom pozostałego gracza o rozłączeniu przeciwnika
-          io.to(roomCode).emit('opponent-disconnected');
-      }
+    rooms[roomCode].players = rooms[roomCode].players.filter(id => id !== socket.id);
+    if (rooms[roomCode].players.length === 0) {
+      delete rooms[roomCode];
+    } else {
+      // Powiadom pozostałego gracza o rozłączeniu przeciwnika
+      io.to(roomCode).emit('opponent-disconnected');
+    }
   });
 });
 
