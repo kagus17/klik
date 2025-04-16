@@ -26,8 +26,8 @@ router.post('/login', async (req, res) => {
 
 // Reset hasła (na teraz testowo – zmienia na '1234')
 router.post('/reset', async (req, res) => {
-  const { username } = req.body;
-  const hash = await bcrypt.hash('1234', 10);
+  const { username, password } = req.body;
+  const hash = await bcrypt.hash(password, 10);
   await db.query('UPDATE users SET password = ? WHERE username = ?', [hash, username]);
   res.json({ success: true });
 });
