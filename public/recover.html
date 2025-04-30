@@ -59,12 +59,14 @@
 
 							  if (res.ok) {
 								status.innerText = 'Zresetowano hasło!';
-							  } else {
+							  } 
+							  else {
 								status.innerText = 'Błąd resetu hasła.';
 							  }
 							//alert("Hasło zostało zmienione prawidłowo.");
 						}
-						catch (err) {
+						catch (err) 
+						{
 							status.innerText = "Brak komunikacji z serwerem.";
 						}
 					//}); // to trzeba będzie zakomentować dla alertów
