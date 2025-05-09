@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="recovery_main.css">
+  <title>KLIK | Odzyskaj hasło</title>
+</head>
+<body>
+  
+  <div class="background">
+    <div class="logo-container">
+        <img src="logo.png" alt="Logo" class="logo-img">
+    </div>
+    
+    <h1>Odzyskaj hasło</h1>
+    <form id="login-form">
+        <div class="recover-info">
+            Jeśli towje konto istnieje, prześlemy tobie instrukcje resetowania hasła.
+          </div>
+      <div class="input-space">
+        <input type="text" name="Email" placeholder="Email" required>
+      </div>
+      <button type="submit" class="btn">Odzyskaj</button>
+    </form>
+
+  <div id="status"></div>
+
+  <script>
+    const status = document.getElementById('status');
+
+    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/reset', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zresetowano hasło! Nowe: 1234';
+      } else {
+        status.innerText = 'Błąd resetu hasła.';
+      }
+    });
+  </script>
+</body>
+</html>

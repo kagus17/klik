@@ -1,0 +1,76 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Noto Sans", sans-serif; 
+  }
+  
+  body {
+      display: flex;
+      justify-content: center; 
+      align-items: center;
+      min-height: 100vh;
+      padding: 0 25%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
+      background-position: center;
+      background-size: cover;
+      background-color: black;
+    }
+  
+    .background{
+      height: 500px;
+      width: 420px;
+      max-width: 420px; 
+      background: transparent;
+      background-color: #955f46;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 10px black;
+      color: white;
+      border-radius: 10px;
+      padding:  30px 40px;
+    }
+
+    .background h1{
+        font-size: 36px;
+        text-align: center;
+      }
+      
+      .background .input-space{
+        position: relative;
+        width: 100%;
+        height: 50px;
+        margin: 30px 0;
+      }
+      
+      .input-space input{
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        border: 2px solid rgb(133, 133, 128);
+        border-radius: 40px;
+        font-size: 16px;
+        color: white;
+        padding: 20px 45px 20px 20px;
+      }
+      
+      .input-space input::placeholder{
+        color: white;
+      }
+      
+      .input-space i{
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+      }
+    
+      .input-space input:focus {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5); 
+        color: white; 
+        outline: none; 
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }

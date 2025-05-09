@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="login_main.css">
+  <title>Logowanie do gry</title>
+</head>
+<body>
+  
+  <!-- Sekcja logowania -->
+  <div class="background">
+    <h1>Zaloguj się</h1>
+    <form id="login-form">
+      <div class="input-space">
+        <input type="text" name="username" placeholder="Login" required>
+      </div>
+      <div class="input-space">
+        <input type="password" name="password" placeholder="Hasło" required>
+      </div>
+      <button type="submit" class="btn">Zaloguj</button>
+    </form>
+    <div class="forgot-password">
+      Nie pamiętasz hasła? <a href="recovery_passwd.html"><b>Przypomnij</b></a>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class="logo-container">
+    <img src="logo.png" alt="Logo" class="logo-img">
+  </div>
+
+  <!-- Sekcja rejestracji -->
+  <div class="register background">
+    <h1>Rejestracja</h1>
+    <form id="register-form">
+      <div class="input-space">
+        <div class="upper-form">
+          <input type="text" name="username" placeholder="Login" required>
+          <input type="password" name="password" placeholder="Hasło" required>
+        </div>
+      </div>
+      <div class="input-space" id="email">
+        <input type="text" name="Email" placeholder="Email" required>
+      </div>
+      <button type="submit" class="btn">Zarejestruj</button>
+    </form>
+  </div>
+
+  <!-- Status komunikatów -->
+  <div id="status"></div>
+
+  <!-- Skrypty -->
+  <script>
+    const status = document.getElementById('status');
+
+    // Obsługa logowania
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        window.location.href = '/menu.html'; // Przejście do strony z pokojami
+      } else {
+        status.innerText = 'Błąd logowania.';
+      }
+    });
+
+    // Obsługa rejestracji
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zarejestrowano! Możesz się zalogować.';
+      } else {
+        status.innerText = 'Błąd rejestracji.';
+      }
+    });
+
+    // Obsługa resetu hasła
+    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/auth/reset', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+      });
+
+      if (res.ok) {
+        status.innerText = 'Zresetowano hasło! Nowe: 1234';
+      } else {
+        status.innerText = 'Błąd resetu hasła.';
+      }
+    });
+  </script>
+</body>
+</html>
