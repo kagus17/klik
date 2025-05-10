@@ -2,12 +2,17 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const db = require('../db');
 const router = express.Router();
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY); // Klucz API z SendGrid
 
 // Rejestracja
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email } = req.body; // Dodano email
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Email jest wymagany.' });
+  }
   const hash = await bcrypt.hash(password, 10);
-  await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash]);
+  await db.query('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [username, hash, email]); // Dodano email
   res.json({ success: true });
 });
 
