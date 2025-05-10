@@ -182,11 +182,6 @@ class MixOrMatch {
         this.cardToCheck = null;
     }
     cardMatch(card1, card2) {
-        if (!this.cardsArray || this.cardsArray.length === 0) {
-            console.error('cardsArray is not initialized or empty.');
-            return;
-        }
-
         this.matchedCards.push(card1);
         this.matchedCards.push(card2);
         card1.classList.add('matched');
@@ -234,13 +229,7 @@ function ready() {
         const roomCodeDisplay = document.getElementById('room-code-display');
         const waitingMessage = document.getElementById('waiting-message');
         const opponentInfo = document.getElementById('opponent-info');
-        let cardsMulti = Array.from(document.getElementsByClassName('card'));
-        if (!cardsMulti || cardsMulti.length === 0) {
-            console.error('No cards found for multiplayer in the DOM.');
-            return;
-        }
-        console.log('CardsMulti:', cardsMulti);
-
+        
         // Wyświetl kod pokoju i poziom trudności
         roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
         
@@ -256,17 +245,10 @@ function ready() {
             opponentInfo.style.display = 'block';
 
             // Rozpocznij grę z odpowiednim poziomem trudności
-            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, cardsMulti);
+            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, Array.from(document.getElementsByClassName('card')));
             game.startGame();
-
-            // Dodaj nasłuchiwanie na kliknięcia kart
-            cardsMulti.forEach(card => {
-            card.addEventListener('click', () => {
-                game.flipCard(card);
-                });
-            });
         });
-
+        
         socket.on('opponent-disconnected', () => {
             waitingMessage.textContent = 'Przeciwnik opuścił grę. Przekierowanie...';
             setTimeout(() => {
@@ -274,7 +256,7 @@ function ready() {
             }, 3000);
         });
     }
-    /*let overlays = Array.from(document.getElementsByClassName('overlay-text'));
+    let overlays = Array.from(document.getElementsByClassName('overlay-text'));
     let cards = Array.from(document.getElementsByClassName('card'));
     let game = new MixOrMatch(100, cards);
 
@@ -289,5 +271,5 @@ function ready() {
         card.addEventListener('click', () => {
             game.flipCard(card);
         });
-    });*/
+    });
 }
