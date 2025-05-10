@@ -1,13 +1,13 @@
-const mysql = require('mysql2');
+/*const mysql = require('mysql2');
 
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',
   database: 'gra1v1'
-});
+});*/
 //
-/*const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2');
 require('dotenv').config(); // wczytuje plik .env
@@ -21,7 +21,7 @@ const pool = mysql.createPool({
   ssl: {
     ca: fs.readFileSync(path.join(__dirname, 'certs', 'DigiCertGlobalRootCA.crt.pem'))
   }
-});*/
+});
 
 module.exports = pool.promise();
 
