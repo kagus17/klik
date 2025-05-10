@@ -5,10 +5,10 @@
 	</head>
 	<body>
 		<div id="haslo">
-			<form method="post" id="odzyskajHaslo">
+			<form method="post" id="odzyskajHaslo" action="/auth/reset">
 				<h1>Odzyskaj hasło</h1>
 				Użytkowniku, tutaj wprowadź nowe hasło:<br>
-				<input type="password" id="password" placeholder="Wprowadź nowe hasło" required><br>
+				<input type="password" id="password" name="password" placeholder="Wprowadź nowe hasło" required><br>
 				<a href="#"><img src="hideLight.png" title="Pokaż hasło"></a><br>
 				<input type="submit" class="zmienHaslo" value="Zmień hasło" title="Kliknij, aby zresetować hasło.">
 			</form>
@@ -41,34 +41,26 @@
 					//{ // to trzeba będzie zakomentować dla alertów
 						//e.preventDefault(); // to trzeba zakomentować dla alertów
 						var password = haslo.value;
-						if (password.length < 8)
-						{
-							status.innerText = "Hasło musi zawierać co najmniej 8 znaków.";
-							return;
-							//document.getElementById("rezultat").innerHTML = "Hasło musi zawierać co najmniej 8 znaków.";
-						}
-						else
-						{
-							try {
+						try {
 							//document.getElementById("rezultat").innerHTML = password;
 							//document.getElementById('odzyskajHaslo').addEventListener('submit', async (e) => {
-							  //e.preventDefault();
-							  const formData = new FormData(zmienHaslo);
-							  const res = await fetch('/auth/reset', {
-								method: 'POST',
-								body: new URLSearchParams(formData)
-							  });
+							//e.preventDefault();
+							const formData = new FormData(zmienHaslo);
+							const res = await fetch('/auth/reset', {
+							method: 'POST',
+							body: new URLSearchParams(formData)
+							});
 
-							  if (res.ok) {
-								status.innerText = 'Zresetowano hasło!';
-							  } else {
-								status.innerText = 'Błąd resetu hasła.';
-							  }
-							//alert("Hasło zostało zmienione prawidłowo.");
+							if (res.ok) {
+							window.location.href = '/index.html'; // Przejście do strony logowania
+							} else if (res.status === 400) {
+							} else {
+							status.innerText = 'Błąd resetu hasła.';
 							}
-							catch (err) {
-								status.innerText = "Brak komunikacji z serwerem.";
-							}
+						//alert("Hasło zostało zmienione prawidłowo.");
+						}
+						catch (err) {
+							status.innerText = "Brak komunikacji z serwerem.";
 						}
 					//}); // to trzeba będzie zakomentować dla alertów
 				});
