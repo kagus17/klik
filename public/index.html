@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="login_main.css">
-  <title>Logowanie do gry</title>
+  <title>KLIK | Logowanie/Rejestracja</title>
 </head>
 <body>
   
@@ -12,12 +12,12 @@
     <h1>Zaloguj się</h1>
     <form id="login-form">
       <div class="input-space">
-        <input type="text" name="username" placeholder="Login" required>
+        <input type="text" name="username" placeholder="Login" id="login" required>
       </div>
       <div class="input-space">
         <input type="password" name="password" placeholder="Hasło" required>
       </div>
-      <button type="submit" class="btn">Zaloguj</button>
+      <button type="submit" class="btn" onclick="lsRememberMe()">Zaloguj</button>
     </form>
     <div class="forgot-password">
       Nie pamiętasz hasła? <a href="recovery_passwd.html"><b>Przypomnij</b></a>
@@ -100,6 +100,7 @@
         status.innerText = 'Błąd resetu hasła.';
       }
     });
+
   </script>
 </body>
 </html>
