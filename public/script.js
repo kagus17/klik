@@ -47,6 +47,7 @@ class MixOrMatch {
         this.roomCode = new URLSearchParams(window.location.search).get('code');
         this.difficulty = difficulty || 'easy'; // Ustaw domyślny poziom trudności na 'easy'
         this.isMultiplayer = !!this.roomCode;
+        this.resultsDisplayed = false; 
         
         // Inicjalizuj wszystkie wymagane właściwości
         this.totalClicks = 0;
@@ -76,10 +77,30 @@ class MixOrMatch {
             });
             
             socket.on('game-ended', () => {
-                document.getElementById('game-over-text').classList.add('visible');
-                setTimeout(() => {
-                    window.location.href = '/menu.html';
-                }, 5000);
+            console.log('Gra zakończona. Użytkownik musi kliknąć, aby wrócić do menu.');
+            });
+            // Dodaj obsługę zdarzenia 'opponent-finished'
+        socket.on('opponent-finished', ({ flips, timePlayed, matches }) => {
+            console.log('Przeciwnik zakończył grę:', { flips, timePlayed, matches });
+            });
+
+            socket.on('your-results', ({ flips, timePlayed, matches }) => {
+                console.log('Twoje wyniki:', { flips, timePlayed, matches });
+
+                // Wyświetl wyniki gracza
+                showResultsModal('Ty', flips, timePlayed, matches, false);
+            });
+
+             // Dodaj obsługę zdarzenia 'game-results'
+        socket.on('game-results', (results) => {
+            console.log('Wyniki obu graczy:', results);
+            results.forEach(result => {
+            const isWinner = result.playerId === socket.id && result.matches === this.cardsArray.length / 2;
+            if (result.playerId === socket.id) {
+            // Wyświetl wyniki tylko dla aktualnego gracza
+            showResultsModal('Ty', result.flips, result.timePlayed, result.matches, isWinner);
+            }
+            });
             });
         }
     }
@@ -107,7 +128,7 @@ class MixOrMatch {
         }, 1000);*/
         null
     }
-    gameOver() {
+    /*gameOver() {
         clearInterval(this.countdown);
         this.audioController.gameOver();
         document.getElementById('game-over-text').classList.add('visible');
@@ -116,7 +137,7 @@ class MixOrMatch {
         clearInterval(this.countdown);
         this.audioController.victory();
         document.getElementById('victory-text').classList.add('visible');
-    }
+    }*/
     hideCards() {
         this.cardsArray.forEach(card => {
             card.classList.remove('visible');
@@ -146,30 +167,54 @@ class MixOrMatch {
     }
 
     gameOver() {
-        clearInterval(this.countdown);
+        if (this.resultsDisplayed) return; // Jeśli wyniki już zostały wyświetlone, zakończ
+        this.resultsDisplayed = true;
+
         this.audioController.gameOver();
-        document.getElementById('game-over-text').classList.add('visible');
-        
+       
         if (this.isMultiplayer) {
-            socket.emit('game-over', { roomCode: this.roomCode });
-            document.getElementById('game-over-text').classList.add('visible');
-            setTimeout(() => {
-                window.location.href = '/menu.html';
-            }, 5000);
-        }
+        // Wyślij wynik gracza do serwera
+        const timePlayed = this.totalTime - this.timeRemaining;
+        const matches = this.matchedCards.length / 2;
+        socket.emit('player-finished', {
+            roomCode: this.roomCode,
+            playerId: socket.id,
+            flips: this.totalClicks,
+            timePlayed,
+            matches
+        });
+
+        // Wyświetl wyniki gracza
+        showResultsModal('Ty', this.totalClicks, timePlayed, matches, false);
+    } else {
+        document.getElementById('game-over-text').classList.add('visible');
+    }
     }
 
     victory() {
-        clearInterval(this.countdown);
+        if (this.resultsDisplayed) return; // Jeśli wyniki już zostały wyświetlone, zakończ
+        this.resultsDisplayed = true;
+
         this.audioController.victory();
-        document.getElementById('victory-text').classList.add('visible');
         
         if (this.isMultiplayer) {
-            socket.emit('game-over', { roomCode: this.roomCode });
-            setTimeout(() => {
-                window.location.href = '/menu.html';
-            }, 5000);
-        }
+        // Wyślij wynik gracza do serwera
+        const timePlayed = this.totalTime - this.timeRemaining;
+        const matches = this.matchedCards.length / 2;
+        socket.emit('player-finished', {
+            roomCode: this.roomCode,
+            playerId: socket.id,
+            flips: this.totalClicks,
+            timePlayed,
+            matches
+        });
+
+        // Wyświetl wyniki gracza
+        const isWinner = this.matchedCards.length === this.cardsArray.length; // Sprawdź, czy gracz odkrył wszystkie pary
+        showResultsModal('Ty', this.totalClicks, timePlayed, matches, isWinner);
+    } else {
+        document.getElementById('victory-text').classList.add('visible');
+    }
     }
 
 
@@ -222,6 +267,38 @@ if (document.readyState == 'loading') {
     document.addEventListener('DOMContentLoaded', ready);
 } else {
     ready();
+}
+
+function showResultsModal(playerName, flips, timePlayed, matches, isWinner) {
+    // Pobierz istniejący modal
+    const modal = document.getElementById('results-modal');
+
+    // Wypełnij dane w modalu
+    document.getElementById('results-title').innerText = isWinner ? 'Zwycięstwo!' : 'Koniec gry';
+    document.getElementById('results-player-name').innerText = `Gracz: ${playerName}`;
+    document.getElementById('results-flips').innerText = `Liczba odwróceń: ${flips}`;
+    document.getElementById('results-time').innerText = `Czas gry: ${timePlayed} sekund`;
+    document.getElementById('results-matches').innerText = `Prawidłowe dopasowania: ${matches}`;
+
+    // Wyświetl modal na pełnym ekranie
+    modal.classList.remove('hidden');
+    modal.classList.add('visible');
+}
+
+function saveResult(playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime) {
+    fetch('/game/save-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime })
+    }).then(res => res.json())
+      .then(data => {
+          if (data.success) console.log('Wynik zapisany!');
+          else console.error('Błąd zapisu wyniku:', data.error);
+      });
+}
+
+function calculateScore(timePlayed, matches) {
+    return matches * 100 - timePlayed * 2; // Każde dopasowanie daje 100 punktów, czas odejmuje 2 punkty za sekundę
 }
 
 function ready() {

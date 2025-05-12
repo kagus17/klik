@@ -95,6 +95,21 @@ io.on('connection', (socket) => {
 
   }
 
+  socket.on('player-finished', ({ roomCode, playerId, flips, timePlayed, matches }) => {
+    const room = rooms[roomCode];
+    if (!room) return;
+
+    // Zapisz wynik gracza
+    room.results = room.results || [];
+    room.results.push({ playerId, flips, timePlayed, matches });
+
+    // Wyślij wyniki tylko do gracza, który zakończył grę
+    socket.emit('your-results', { flips, timePlayed, matches });
+
+    // Powiadom drugiego gracza, że pierwszy skończył
+    socket.to(roomCode).emit('opponent-finished', { flips, timePlayed, matches });
+});
+
   socket.on('disconnect', () => {
     for (const roomCode in rooms) {
       rooms[roomCode].players = rooms[roomCode].players.filter(player => player.id !== socket.id);
@@ -130,6 +145,28 @@ app.get('/session/check', (req, res) => {
       res.json({ loggedIn: false });
     }
   });
+
+const db = require('./db');
+
+app.post('/game/save-result', async (req, res) => {
+    const { playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime } = req.body;
+
+    try {
+        const [room] = await db.query('SELECT id FROM rooms WHERE code = ?', [roomCode]);
+        if (!room.length) return res.status(404).json({ error: 'Pokój nie znaleziony' });
+
+        const roomId = room[0].id;
+        await db.query(
+            'INSERT INTO results (player_name, room_id, flips, time_played, matches, difficulty, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [playerName, roomId, flips, timePlayed, matches, difficulty, startTime, endTime]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Błąd zapisu wyniku' });
+    }
+});
 
   app.post('/auth/logout', (req, res) => {
     req.session.destroy(() => {

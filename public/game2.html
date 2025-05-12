@@ -25,6 +25,16 @@
     <span class="overlay-text-small">Naciśnij aby ponownie rozpocząć gre</span>
   </div>
 
+  <!-- Results Modal -->
+  <div id="results-modal" class="overlay-text hidden">
+    <h2 id="results-title">Wyniki</h2>
+    <p id="results-player-name"></p>
+    <p id="results-flips"></p>
+    <p id="results-time"></p>
+    <p id="results-matches"></p>
+    <button id="return-to-menu">Wróć do menu</button>
+  </div>
+
   <div class="game-container">
     <div class="game-info-container">
         <div class="game-info">
@@ -47,5 +57,11 @@
     </div>
   </div>
 <footer>Made by </footer>
+ <script>
+    // Event listener for "Return to Menu" button
+    document.getElementById('return-to-menu').addEventListener('click', () => {
+      window.location.href = '/menu.html';
+    });
+  </script>
 </body>
 </html>
