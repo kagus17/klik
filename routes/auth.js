@@ -24,12 +24,29 @@ router.post('/login', async (req, res) => {
   res.json({ success: true });
 });
 
-// Reset hasła (na teraz testowo – zmienia na '1234')
+// Reset hasła (na teraz testowo – zmienia dla użytkownika lukasz)
 router.post('/reset', async (req, res) => {
-  const { username } = req.body;
-  const hash = await bcrypt.hash('1234', 10);
-  await db.query('UPDATE users SET password = ? WHERE username = ?', [hash, username]);
-  res.json({ success: true });
+  //console.log("Zażądano resetu hasła: ", req.body);
+  const { password } = req.body;
+  const hash = await bcrypt.hash(password, 10);
+  if (!password || password.length < 8)
+	  res.status(400).send("Hasło musi zawierać co najmniej 8 znaków.");
+  else
+  {
+    try
+    {
+      await db.query("UPDATE users SET password = ? WHERE username = 'lukasz'", [hash]);
+      res.status(200).send("Hasło zostało zmienione.");
+      res.json({ success: true });
+      return;
+    }
+    catch (err)
+    {
+      console.error(err);
+      res.status(500).send("Brak komunikacji z serwerem.");
+    }
+  }
+  
 });
 
 module.exports = router;

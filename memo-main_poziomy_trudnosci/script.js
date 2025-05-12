@@ -31,67 +31,26 @@ class AudioController {
     }
 }
 
-const socket = io();
-
 class MixOrMatch {
-    constructor(difficulty,totalTime, cards) {
+    constructor(totalTime, cards) {
         this.cardsArray = cards;
         this.totalTime = totalTime;
         this.timeRemaining = totalTime;
-        this.timer = document.getElementById('time-remaining');
+        this.timer = document.getElementById('time-remaining')
         this.ticker = document.getElementById('flips');
-        this.opponentFlips = document.getElementById('opponent-flips');
-        this.opponentNameDisplay = document.getElementById('opponent-name');
-        this.difficultyDisplay = document.getElementById('difficulty-display');
         this.audioController = new AudioController();
-        this.roomCode = new URLSearchParams(window.location.search).get('code');
-        this.difficulty = difficulty || 'easy'; // Ustaw domyślny poziom trudności na 'easy'
-        this.isMultiplayer = !!this.roomCode;
-        
-        // Inicjalizuj wszystkie wymagane właściwości
-        this.totalClicks = 0;
-        this.cardToCheck = null;
-        this.matchedCards = []; // DODAJ TĘ LINIĘ
-        this.busy = false;
-
-        if (this.isMultiplayer) {
-            // Wyświetl poziom trudności
-            this.difficultyDisplay.innerText = `Poziom trudności: ${this.difficulty}`;
-
-            socket.on('time-update', ({ timeRemaining }) => {
-                this.timeRemaining = timeRemaining;
-                this.timer.innerText = this.timeRemaining;
-
-                if (this.timeRemaining <= 0) {
-                    this.gameOver();
-                }
-            });
-            // Nasłuchuj nazwy przeciwnika i aktualizacji odwróceń
-            socket.on('opponent-info', ({ opponentName }) => {
-                this.opponentNameDisplay.innerText = opponentName;
-            });
-            // Dodaj nasłuchiwanie na zdarzenie 'opponent-clicked'
-            socket.on('opponent-clicked', (clicks) => {
-                this.opponentFlips.innerText = clicks;
-            });
-            
-            socket.on('game-ended', () => {
-                document.getElementById('game-over-text').classList.add('visible');
-                setTimeout(() => {
-                    window.location.href = '/menu.html';
-                }, 5000);
-            });
-        }
     }
 
     startGame() {
         this.totalClicks = 0;
+        this.timeRemaining = this.totalTime;
         this.cardToCheck = null;
         this.matchedCards = [];
         this.busy = true;
         setTimeout(() => {
             this.audioController.startMusic();
             this.shuffleCards(this.cardsArray);
+            this.countdown = this.startCountdown();
             this.busy = false;
         }, 500)
         this.hideCards();
@@ -99,13 +58,12 @@ class MixOrMatch {
         this.ticker.innerText = this.totalClicks;
     }
     startCountdown() {
-        return /*setInterval(() => {
+        return setInterval(() => {
             this.timeRemaining--;
             this.timer.innerText = this.timeRemaining;
             if(this.timeRemaining === 0)
                 this.gameOver();
-        }, 1000);*/
-        null
+        }, 1000);
     }
     gameOver() {
         clearInterval(this.countdown);
@@ -130,13 +88,6 @@ class MixOrMatch {
             this.ticker.innerText = this.totalClicks;
             card.classList.add('visible');
 
-            if (this.isMultiplayer) {
-                socket.emit('click', { 
-                    roomCode: this.roomCode, 
-                    clicks: this.totalClicks 
-                });
-            }
-
             if(this.cardToCheck) {
                 this.checkForCardMatch(card);
             } else {
@@ -144,35 +95,6 @@ class MixOrMatch {
             }
         }
     }
-
-    gameOver() {
-        clearInterval(this.countdown);
-        this.audioController.gameOver();
-        document.getElementById('game-over-text').classList.add('visible');
-        
-        if (this.isMultiplayer) {
-            socket.emit('game-over', { roomCode: this.roomCode });
-            document.getElementById('game-over-text').classList.add('visible');
-            setTimeout(() => {
-                window.location.href = '/menu.html';
-            }, 5000);
-        }
-    }
-
-    victory() {
-        clearInterval(this.countdown);
-        this.audioController.victory();
-        document.getElementById('victory-text').classList.add('visible');
-        
-        if (this.isMultiplayer) {
-            socket.emit('game-over', { roomCode: this.roomCode });
-            setTimeout(() => {
-                window.location.href = '/menu.html';
-            }, 5000);
-        }
-    }
-
-
     checkForCardMatch(card) {
         if(this.getCardType(card) === this.getCardType(this.cardToCheck))
             this.cardMatch(card, this.cardToCheck);
@@ -182,11 +104,6 @@ class MixOrMatch {
         this.cardToCheck = null;
     }
     cardMatch(card1, card2) {
-        if (!this.cardsArray || this.cardsArray.length === 0) {
-            console.error('cardsArray is not initialized or empty.');
-            return;
-        }
-
         this.matchedCards.push(card1);
         this.matchedCards.push(card2);
         card1.classList.add('matched');
@@ -225,32 +142,11 @@ if (document.readyState == 'loading') {
 }
 
 function ready() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomCode = urlParams.get('code');
-    const difficulty = urlParams.get('difficulty'); // Pobierz poziom trudności z URL
-    const waitingOverlay = document.getElementById('waiting-overlay');
-    const roomCodeDisplay = document.getElementById('room-code-display');
-    const waitingMessage = document.getElementById('waiting-message');
-    const opponentInfo = document.getElementById('opponent-info');
+    const overlays = Array.from(document.getElementsByClassName('overlay-text'));
     const cardContainer = document.getElementById('game-container');
-    
-    if (roomCode) {
+    const difficulty = localStorage.getItem('memoDifficulty') || 'medium';
 
-        // Wyświetl kod pokoju i poziom trudności
-        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
-        
-        // Wyślij dane do serwera
-        socket.emit('join-room', { roomCode, difficulty });
-
-        socket.on('room-created', ({ roomCode, difficulty }) => {
-            roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
-        });
-        
-        socket.on('game-start', ({ difficulty }) => {
-            waitingOverlay.classList.remove('visible');
-            opponentInfo.style.display = 'block';
-
-            // Generowanie kart na podstawie poziomu trudności
+    // Konfiguracja poziomów
     const cardImages = [
         'klawiatura.png', 'kamera.png', 'router.png',
         'drukarka.png', 'napedoptyczny.png', 'monitor.png',
@@ -265,14 +161,13 @@ function ready() {
 
     const selected = cardImages.slice(0, cardPairsCount);
     const allImages = [...selected, ...selected];
+    shuffleArray(allImages);
 
-    // Tasowanie kart
-    for (let i = allImages.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [allImages[i], allImages[j]] = [allImages[j], allImages[i]];
-    }
+    // Dopasuj układ siatki
+    const columns = Math.min(cardPairsCount * 2, 6);
+    cardContainer.style.gridTemplateColumns = `repeat(${columns}, auto)`;
 
-    // Generowanie kart w HTML
+    // Wygeneruj karty w HTML
     cardContainer.innerHTML = '';
     allImages.forEach(image => {
         const cardHTML = `
@@ -291,39 +186,13 @@ function ready() {
                 <img class="cob-web cob-web-bottom-right" src="Assets/Images/wisienka.png">
                 <img class="card-value" src="Assets/Images/${image}">
             </div>
-        </div>`;
+        </div>
+        `;
         cardContainer.insertAdjacentHTML('beforeend', cardHTML);
     });
-    
-        let cardsMulti = Array.from(document.getElementsByClassName('card'));
-        if (!cardsMulti || cardsMulti.length === 0) {
-            console.error('No cards found for multiplayer in the DOM.');
-            return;
-        }
-        console.log('CardsMulti:', cardsMulti);
 
-            // Rozpocznij grę z odpowiednim poziomem trudności
-            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, cardsMulti);
-            game.startGame();
-
-            // Dodaj nasłuchiwanie na kliknięcia kart
-            cardsMulti.forEach(card => {
-            card.addEventListener('click', () => {
-                game.flipCard(card);
-                });
-            });
-        });
-
-        socket.on('opponent-disconnected', () => {
-            waitingMessage.textContent = 'Przeciwnik opuścił grę. Przekierowanie...';
-            setTimeout(() => {
-                window.location.href = '/menu.html';
-            }, 3000);
-        });
-    }
-    /*let overlays = Array.from(document.getElementsByClassName('overlay-text'));
-    let cards = Array.from(document.getElementsByClassName('card'));
-    let game = new MixOrMatch(100, cards);
+    const cards = Array.from(document.getElementsByClassName('card'));
+    const game = new MixOrMatch(100, cards);
 
     overlays.forEach(overlay => {
         overlay.addEventListener('click', () => {
@@ -336,5 +205,11 @@ function ready() {
         card.addEventListener('click', () => {
             game.flipCard(card);
         });
-    });*/
+    });
+}
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
 }

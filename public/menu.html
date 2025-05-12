@@ -3,6 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <title>Menu gry</title>
+  <style>
+    body {
+      font-family: Jazz LET, fantasy;
+      background: radial-gradient(#ffd9de, #3c0001);
+      color: #3c0001;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    h1 {
+      font-size: 4em;
+      margin-bottom: 40px;
+    }
+
+    .btn {
+      display: block;
+      width: 200px;
+      margin: 20px auto;
+      padding: 15px;
+      font-size: 1.5em;
+      background-color: #ffd9de;
+      border: 3px solid #3c0001;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
 </head>
 <body>
   <h1>Witaj w grze 1v1</h1>
@@ -14,9 +45,9 @@
 <h3></h3>
   <label for="difficulty">Wybierz poziom trudności:</label>
   <select id="difficulty">
-    <option value="easy">Łatwy</option>
-    <option value="medium" selected>Średni</option>
-    <option value="hard">Trudny</option>
+    <option class="btn" value="easy">Łatwy (3 pary)</option>
+    <option class="btn" value="medium" selected>Średni (6 par)</option>
+    <option class="btn" value="hard">Trudny (12 par)</option>
   </select>
 </div>
 
