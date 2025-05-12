@@ -6,8 +6,8 @@ const pool = mysql.createPool({
   password: '',
   database: 'gra1v1'
 });
-//
-/*const fs = require('fs');
+/*
+const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2');
 require('dotenv').config(); // wczytuje plik .env

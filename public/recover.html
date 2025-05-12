@@ -1,0 +1,79 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css">
+		<title>Zresetuj hasło</title>
+	</head>
+	<body>
+		<div id="haslo">
+			<form method="post" id="odzyskajHaslo">
+				<h1>Odzyskaj hasło</h1>
+				Użytkowniku, tutaj wprowadź nowe hasło:<br>
+				<input type="password" id="password" placeholder="Wprowadź nowe hasło" required><br>
+				<a href="#"><img src="hideLight.png" title="Pokaż hasło"></a><br>
+				<input type="submit" class="zmienHaslo" value="Zmień hasło" title="Kliknij, aby zresetować hasło.">
+			</form>
+		</div>
+		<p id="status"></p>
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				const status = document.getElementById("status");
+				const zmienHaslo = document.getElementById("odzyskajHaslo");
+				const pokazHaslo = document.querySelector('#haslo a');
+				const haslo = document.getElementById("password");
+			
+				pokazHaslo.addEventListener('click', function(e) {
+					e.preventDefault();
+					w=document.querySelector('#haslo input');
+					if(w.type == 'password')
+					{
+						w.type = 'text';
+						this.innerHTML = "<img src='showLight.png' title='Ukryj hasło'>";
+					}
+					else
+					{
+						w.type = 'password';
+						this.innerHTML = "<img src='hideLight.png' title='Pokaż hasło'>";
+					}
+				});
+				
+				zmienHaslo.addEventListener('submit', async function (e) {
+					//document.querySelector(".zmienHaslo").addEventListener("click", function(e) // to trzeba zakomentować dla alertów
+					//{ // to trzeba będzie zakomentować dla alertów
+						//e.preventDefault(); // to trzeba zakomentować dla alertów
+						var password = haslo.value;
+						if (password.length < 8)
+						{
+							status.innerText = "Hasło musi zawierać co najmniej 8 znaków.";
+							return;
+							//document.getElementById("rezultat").innerHTML = "Hasło musi zawierać co najmniej 8 znaków.";
+						}
+						try {
+							//document.getElementById("rezultat").innerHTML = password;
+							//document.getElementById('odzyskajHaslo').addEventListener('submit', async (e) => {
+							  //e.preventDefault();
+							  const formData = new FormData(zmienHaslo);
+							  const res = await fetch('/auth/reset', {
+								method: 'POST',
+								body: new URLSearchParams(formData)
+							  });
+
+							  if (res.ok) {
+								status.innerText = 'Zresetowano hasło!';
+							  } 
+							  else {
+								status.innerText = 'Błąd resetu hasła.';
+							  }
+							//alert("Hasło zostało zmienione prawidłowo.");
+						}
+						catch (err) 
+						{
+							status.innerText = "Brak komunikacji z serwerem.";
+						}
+					//}); // to trzeba będzie zakomentować dla alertów
+				});
+			});
+			
+			
+		</script>
+	</body>
+</html>
