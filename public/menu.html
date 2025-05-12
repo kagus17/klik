@@ -2,30 +2,57 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="menu_main.css">
   <title>Menu gry</title>
 </head>
 <body>
-  <h1>Witaj w grze 1v1</h1>
 
-  <div id="status"></div>
+  <div class ="logo_container">
+    <div id="status"></div>
+  </div>
 
-  <button id="create-room">Utwórz pokój</button>
-<div class="difficulty-select">
-<h3></h3>
-  <label for="difficulty">Wybierz poziom trudności:</label>
-  <select id="difficulty">
-    <option value="easy">Łatwy</option>
-    <option value="medium" selected>Średni</option>
-    <option value="hard">Trudny</option>
-  </select>
-</div>
+  <div class = "container">
+    <div class = "box1">
+      <div class="create_room">
+        <h3>Stwórz gre</h3>
+        <div class="difficulty-select">
+          <label for="difficulty">Wybierz poziom trudności:</label>
+          <select id="difficulty">
+            <option value="easy">Łatwy</option>
+            <option value="medium" selected>Średni</option>
+            <option value="hard">Trudny</option>
+          </select>
+        </div>
+        <button id="create-room">Utwórz pokój</button>
+      </div>
 
-  <h3>Lub dołącz do istniejącego pokoju</h3>
-  <form id="join-form">
-    <input type="text" name="code" placeholder="Kod pokoju" required maxlength="6">
-    <button type="submit">Dołącz</button>
-  </form>
-  <button id="logout">Wyloguj</button>
+
+    <div class="join_room">
+      <h3>Dołącz do istniejącego pokoju</h3>
+      <form id="join-form">
+        <input type="text" name="code" placeholder="Kod pokoju" required maxlength="6">
+        <button type="submit">Dołącz</button>
+      </form>
+    </div>
+  </div>
+
+  <div class = "leaderboard">
+    <h3>Najlepsze wyniki</h3>
+    <table id="leaderboard">
+      <thead>
+        <tr>
+          <th>Gracz</th>
+          <th>Punkty</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Tutaj będą wstawiane wyniki -->
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!--<button id="logout">Wyloguj</button>-->
 
   <script>
     const status = document.getElementById('status');
@@ -39,7 +66,7 @@
       alert('Musisz być zalogowany!');
       window.location.href = '/index.html';
     } else {
-      status.innerText = `Zalogowany jako: ${data.username}`;
+      status.innerText = `Witaj ${data.username}`;
     }
     })();
 

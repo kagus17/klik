@@ -1,26 +1,51 @@
 * {
     margin: 0;
-    padding: 0;
     box-sizing: border-box;
-    font-family: "Noto Sans", sans-serif; 
+    font-family: "Noto Sans", sans-serif;
   }
   
-  body {
+body {
+    display: flex;
+    min-height: 100vh;
+    padding: 0 25%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
+    background-position: center;
+    background-size: cover;
+    background-color: black;
+    gap: 50px;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-around;
+  }
+    
+    .container {
       display: flex;
-      justify-content: center; 
-      align-items: center;
-      min-height: 100vh;
-      padding: 0 25%;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
-      background-position: center;
-      background-size: cover;
-      background-color: black;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 50px;
+      width: 100%;
+      height: auto;
     }
+
+    .box1 {
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+#status {
+  font-weight: bold;
+  font-size: 70px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
   
-    .background{
-      height: 500px;
-      width: 420px;
-      max-width: 420px; 
+    .create_room{
+      height: 325px;
+      width: 100%;
       background: transparent;
       background-color: #955f46;
       backdrop-filter: blur(20px);
@@ -30,12 +55,36 @@
       padding:  30px 40px;
     }
 
-    .background h1{
+    .join_room{
+      height: 325px;
+      width: 100%;
+      background: transparent;
+      background-color: rgba(83, 25, 175, 0.952);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 10px black;
+      color: white;
+      border-radius: 10px;
+      padding:  30px 40px;
+    }
+
+    .leaderboard{
+      height: 700px;
+      width:500px;
+      background: transparent;
+      background-color: rgba(83, 25, 175, 0.952);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 10px black;
+      color: white;
+      border-radius: 10px;
+      padding:  30px 40px;
+    }
+
+    .create_room h1{
         font-size: 36px;
         text-align: center;
       }
       
-      .background .input-space{
+      .create_room .input-space{
         position: relative;
         width: 100%;
         height: 50px;
