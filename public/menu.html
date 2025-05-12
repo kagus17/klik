@@ -3,54 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="menu_main.css">
-  <title>Menu gry</title>
-  <style>
-
-    .btn {
-      display: block;
-      width: 200px;
-      margin: 20px auto;
-      padding: 15px;
-      font-size: 1.5em;
-      background-color: #ffd9de;
-      border: 3px solid #3c0001;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .btn:hover {
-      transform: scale(1.05);
-    }
-  </style>
+  <title>KLIK | Menu gry</title>
 </head>
 <body>
 
   <div class ="logo_container">
     <div id="status"></div>
+      <h1>Stwórz własny pokój lub dołącz do istniejącej gry i osiągnij najlepszy wynik.</h1>
   </div>
+
 
   <div class = "container">
     <div class = "box1">
       <div class="create_room">
         <h3>Stwórz gre</h3>
+        <label for="difficulty">Wybierz poziom trudności:</label>
         <div class="difficulty-select">
-            <label for="difficulty">Wybierz poziom trudności:</label>
             <select id="difficulty">
-              <option class="btn" value="easy">Łatwy (3 pary)</option>
-              <option class="btn" value="medium" selected>Średni (6 par)</option>
-              <option class="btn" value="hard">Trudny (12 par)</option>
+              <option class="opt" value="easy">Łatwy (3 pary)</option>
+              <option class="opt" value="medium" selected>Średni (6 par)</option>
+              <option class="opt" value="hard">Trudny (12 par)</option>
             </select>
         </div>
-        <button id="create-room">Utwórz pokój</button>
+        <button id="create-room" class ="btn">Utwórz pokój</button>
       </div>
 
-
     <div class="join_room">
-      <h3>Dołącz do istniejącego pokoju</h3>
-      <form id="join-form">
-        <input type="text" name="code" placeholder="Kod pokoju" required maxlength="6">
-        <button type="submit">Dołącz</button>
+      <h3>Dołącz do gry</h3>
+      <div class = "input-space">
+        <form id="join-form">
+          <input type="text" name="code" placeholder="Kod pokoju" required maxlength="6">
+        </div>
+        <button type="submit" class="btn">Dołącz</button>
       </form>
     </div>
   </div>
