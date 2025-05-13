@@ -138,6 +138,22 @@ border: none;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
+.remember-me {
+  display: flex; /* Ustawienie Flexbox */
+  align-items: center; /* Wyśrodkowanie w pionie */
+  margin: 10px 7px; /* Odstępy góra-dół */
+  gap: 7px; /* Odstęp między checkboxem a tekstem */
+}
+
+.remember-me input {
+  margin: 0; /* Usuń domyślne marginesy */
+}
+
+.remember-me label {
+  font-size: 14px; /* Rozmiar tekstu */
+  color: white; /* Kolor tekstu */
+}
+
 @media (max-width: 1024px) {
   body {
     padding: 0 10%;
