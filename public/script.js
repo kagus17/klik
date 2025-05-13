@@ -275,7 +275,6 @@ function showResultsModal(playerName, flips, timePlayed, matches, isWinner) {
 
     // Wypełnij dane w modalu
     document.getElementById('results-title').innerText = isWinner ? 'Zwycięstwo!' : 'Koniec gry';
-    document.getElementById('results-player-name').innerText = `Gracz: ${playerName}`;
     document.getElementById('results-flips').innerText = `Liczba odwróceń: ${flips}`;
     document.getElementById('results-time').innerText = `Czas gry: ${timePlayed} sekund`;
     document.getElementById('results-matches').innerText = `Prawidłowe dopasowania: ${matches}`;
