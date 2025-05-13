@@ -99,15 +99,14 @@ io.on('connection', (socket) => {
     const room = rooms[roomCode];
     if (!room) return;
 
-    // Zapisz wynik gracza
-    room.results = room.results || [];
-    room.results.push({ playerId, flips, timePlayed, matches });
-
-    // Wyślij wyniki tylko do gracza, który zakończył grę
-    socket.emit('your-results', { flips, timePlayed, matches });
-
-    // Powiadom drugiego gracza, że pierwszy skończył
-    socket.to(roomCode).emit('opponent-finished', { flips, timePlayed, matches });
+    // Jeśli to pierwszy gracz, który kończy grę, przypisz mu status zwycięzcy
+    if (!room.winner) {
+        room.winner = playerId; // Zapisz ID zwycięzcy
+        io.to(playerId).emit('your-results', { flips, timePlayed, matches, isWinner: true });
+    } else {
+        // Jeśli to drugi gracz, przypisz mu status przegranego
+        io.to(playerId).emit('your-results', { flips, timePlayed, matches, isWinner: false });
+    }
 });
 
   socket.on('disconnect', () => {
