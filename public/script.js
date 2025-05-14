@@ -84,12 +84,26 @@ class MixOrMatch {
             console.log('Przeciwnik zakończył grę:', { flips, timePlayed, matches });
             });
 
-            socket.on('your-results', ({ flips, timePlayed, matches }) => {
-                console.log('Twoje wyniki:', { flips, timePlayed, matches });
+            socket.on('your-results', ({ flips, timePlayed, matches, isWinner }) => {
+    console.log('Twoje wyniki:', { flips, timePlayed, matches, isWinner });
 
-                // Wyświetl wyniki gracza
-                showResultsModal('Ty', flips, timePlayed, matches, false);
-            });
+    // Wyświetl wyniki gracza
+    const modal = document.getElementById('results-modal');
+    document.getElementById('results-title').innerText = isWinner ? 'Zwycięstwo!' : 'Przegrana';
+    document.getElementById('results-flips').innerText = `Liczba odwróceń: ${flips}`;
+    document.getElementById('results-time').innerText = `Czas gry: ${timePlayed} sekund`;
+    document.getElementById('results-matches').innerText = `Prawidłowe dopasowania: ${matches}`;
+    modal.classList.remove('hidden');
+    modal.classList.add('visible');
+});
+socket.on('time-up-results', ({ status }) => {
+    // Zaktualizuj nagłówek wyników
+    const modal = document.getElementById('results-modal');
+    const resultsTitle = document.getElementById('results-title');
+    resultsTitle.innerText = status;
+    modal.classList.remove('hidden');
+    modal.classList.add('visible');
+});
 
              // Dodaj obsługę zdarzenia 'game-results'
         socket.on('game-results', (results) => {
@@ -167,15 +181,16 @@ class MixOrMatch {
     }
 
     gameOver() {
-        if (this.resultsDisplayed) return; // Jeśli wyniki już zostały wyświetlone, zakończ
-        this.resultsDisplayed = true;
+    if (this.resultsDisplayed) return; // Jeśli wyniki już zostały wyświetlone, zakończ
+    this.resultsDisplayed = true;
 
-        this.audioController.gameOver();
-       
-        if (this.isMultiplayer) {
+    this.audioController.gameOver();
+
+    if (this.isMultiplayer) {
         // Wyślij wynik gracza do serwera
         const timePlayed = this.totalTime - this.timeRemaining;
         const matches = this.matchedCards.length / 2;
+
         socket.emit('player-finished', {
             roomCode: this.roomCode,
             playerId: socket.id,
@@ -183,13 +198,18 @@ class MixOrMatch {
             timePlayed,
             matches
         });
-
-        // Wyświetl wyniki gracza
-        showResultsModal('Ty', this.totalClicks, timePlayed, matches, false);
+        // Wyślij zdarzenie zakończenia gry do serwera
+        socket.emit('game-over', {
+            roomCode: this.roomCode,
+            playerId: socket.id,
+            flips: this.totalClicks,
+            timePlayed,
+            matches
+        });
     } else {
         document.getElementById('game-over-text').classList.add('visible');
     }
-    }
+}
 
     victory() {
         if (this.resultsDisplayed) return; // Jeśli wyniki już zostały wyświetlone, zakończ
@@ -208,10 +228,6 @@ class MixOrMatch {
             timePlayed,
             matches
         });
-
-        // Wyświetl wyniki gracza
-        const isWinner = this.matchedCards.length === this.cardsArray.length; // Sprawdź, czy gracz odkrył wszystkie pary
-        showResultsModal('Ty', this.totalClicks, timePlayed, matches, isWinner);
     } else {
         document.getElementById('victory-text').classList.add('visible');
     }
@@ -274,7 +290,7 @@ function showResultsModal(playerName, flips, timePlayed, matches, isWinner) {
     const modal = document.getElementById('results-modal');
 
     // Wypełnij dane w modalu
-    document.getElementById('results-title').innerText = isWinner ? 'Zwycięstwo!' : 'Koniec gry';
+    document.getElementById('results-title').innerText = isWinner ? 'Zwycięstwo!' : 'Przegrana';
     document.getElementById('results-flips').innerText = `Liczba odwróceń: ${flips}`;
     document.getElementById('results-time').innerText = `Czas gry: ${timePlayed} sekund`;
     document.getElementById('results-matches').innerText = `Prawidłowe dopasowania: ${matches}`;

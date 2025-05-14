@@ -95,20 +95,61 @@ io.on('connection', (socket) => {
 
   }
 
+  // Funkcja obsługująca zakończenie gry z powodu upływu czasu
+  function handleGameOver(roomCode) {
+    const room = rooms[roomCode];
+    if (!room || room.players.length < 2) return;
+
+    const [player1, player2] = room.players;
+
+    // Porównaj liczbę dopasowań obu graczy
+    const player1Matches = player1.matches || 0;
+    const player2Matches = player2.matches || 0;
+
+    let player1Status, player2Status;
+
+    if (player1Matches > player2Matches) {
+      player1Status = 'Koniec czasu Wygrana';
+      player2Status = 'Koniec czasu Przegrana';
+    } else if (player1Matches < player2Matches) {
+      player1Status = 'Koniec czasu Przegrana';
+      player2Status = 'Koniec czasu Wygrana';
+    } else {
+      player1Status = 'Koniec czasu Remis';
+      player2Status = 'Koniec czasu Remis';
+    }
+
+    // Wyślij wyniki do obu graczy
+    io.to(player1.id).emit('time-up-results', { status: player1Status });
+    io.to(player2.id).emit('time-up-results', { status: player2Status });
+  }
+
+  // Obsługa zakończenia gry z powodu upływu czasu
+  socket.on('game-over', ({ roomCode }) => {
+    handleGameOver(roomCode);
+  });
+
+  // Obsługa zakończenia gry przez gracza
   socket.on('player-finished', ({ roomCode, playerId, flips, timePlayed, matches }) => {
     const room = rooms[roomCode];
     if (!room) return;
 
-    // Zapisz wynik gracza
-    room.results = room.results || [];
-    room.results.push({ playerId, flips, timePlayed, matches });
+    const player = room.players.find(p => p.id === playerId);
+    if (player) {
+      player.flips = flips;
+      player.timePlayed = timePlayed;
+      player.matches = matches;
+    }
 
-    // Wyślij wyniki tylko do gracza, który zakończył grę
-    socket.emit('your-results', { flips, timePlayed, matches });
-
-    // Powiadom drugiego gracza, że pierwszy skończył
-    socket.to(roomCode).emit('opponent-finished', { flips, timePlayed, matches });
-});
+    // Jeśli to pierwszy gracz, który kończy grę, przypisz mu status zwycięzcy
+    if (!room.winner) {
+      room.winner = playerId; // Zapisz ID zwycięzcy
+      io.to(playerId).emit('your-results', { flips, timePlayed, matches, isWinner: true });
+    } else {
+      // Jeśli to drugi gracz, przypisz mu status przegranego
+      io.to(playerId).emit('your-results', { flips, timePlayed, matches, isWinner: false });
+    }
+  });
 
   socket.on('disconnect', () => {
     for (const roomCode in rooms) {
