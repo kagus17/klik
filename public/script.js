@@ -34,7 +34,8 @@ class AudioController {
 const socket = io();
 
 class MixOrMatch {
-    constructor(difficulty,totalTime, cards) {
+    constructor(difficulty,totalTime, cards, loggedInUsername) {
+        this.loggedInUsername = loggedInUsername;
         this.cardsArray = cards;
         this.totalTime = totalTime;
         this.timeRemaining = totalTime;
@@ -119,6 +120,7 @@ socket.on('time-up-results', ({ status }) => {
         }
     }
 
+    
     startGame() {
         this.totalClicks = 0;
         this.cardToCheck = null;
@@ -185,11 +187,14 @@ socket.on('time-up-results', ({ status }) => {
     this.resultsDisplayed = true;
 
     this.audioController.gameOver();
+    
 
     if (this.isMultiplayer) {
         // Wyślij wynik gracza do serwera
         const timePlayed = this.totalTime - this.timeRemaining;
         const matches = this.matchedCards.length / 2;
+        const startTime = new Date(Date.now() - timePlayed * 1000).toISOString(); // Oblicz czas rozpoczęcia
+        const endTime = new Date().toISOString(); // Czas zakończenia
 
         socket.emit('player-finished', {
             roomCode: this.roomCode,
@@ -206,6 +211,17 @@ socket.on('time-up-results', ({ status }) => {
             timePlayed,
             matches
         });
+        // Zapisz wynik do bazy danych
+    saveResult(
+        this.loggedInUsername || 'Gracz', // Nazwa gracza
+        this.roomCode || 'Brak kodu',                 // Kod pokoju
+        this.totalClicks,                             // Liczba odwróceń
+        timePlayed,                                   // Czas gry
+        matches,                                      // Liczba dopasowań
+        this.difficulty,                              // Poziom trudności
+        startTime,                                    // Czas rozpoczęcia
+        endTime                                       // Czas zakończenia
+    );
     } else {
         document.getElementById('game-over-text').classList.add('visible');
     }
@@ -221,6 +237,8 @@ socket.on('time-up-results', ({ status }) => {
         // Wyślij wynik gracza do serwera
         const timePlayed = this.totalTime - this.timeRemaining;
         const matches = this.matchedCards.length / 2;
+        const startTime = new Date(Date.now() - timePlayed * 1000).toISOString(); // Oblicz czas rozpoczęcia
+        const endTime = new Date().toISOString(); // Czas zakończenia
         socket.emit('player-finished', {
             roomCode: this.roomCode,
             playerId: socket.id,
@@ -228,6 +246,17 @@ socket.on('time-up-results', ({ status }) => {
             timePlayed,
             matches
         });
+        // Zapisz wynik do bazy danych
+    saveResult(
+        this.loggedInUsername || 'Gracz', // Nazwa gracza
+        this.roomCode || 'Brak kodu',                 // Kod pokoju
+        this.totalClicks,                             // Liczba odwróceń
+        timePlayed,                                   // Czas gry
+        matches,                                      // Liczba dopasowań
+        this.difficulty,                              // Poziom trudności
+        startTime,                                    // Czas rozpoczęcia
+        endTime                                       // Czas zakończenia
+    );
     } else {
         document.getElementById('victory-text').classList.add('visible');
     }
@@ -327,6 +356,15 @@ function ready() {
     const cardContainer = document.getElementById('game-container');
     
     if (roomCode) {
+        let loggedInUsername = 'Gracz'; // Domyślna wartość
+
+        fetch('/session/check')
+            .then(res => res.json())
+            .then(data => {
+            if (data.loggedIn) {
+                loggedInUsername = data.username;
+            }
+        });
 
         // Wyświetl kod pokoju i poziom trudności
         roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
@@ -395,7 +433,7 @@ function ready() {
         console.log('CardsMulti:', cardsMulti);
 
             // Rozpocznij grę z odpowiednim poziomem trudności
-            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, cardsMulti);
+            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, cardsMulti, loggedInUsername);
             game.startGame();
 
             // Dodaj nasłuchiwanie na kliknięcia kart
