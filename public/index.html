@@ -69,10 +69,37 @@
       }
     });
 
+    // Funkcja walidacji hasła
+    function validatePassword(password) {
+      const minLength = 8;
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      if (
+        password.length >= minLength &&
+        hasUpperCase &&
+        hasLowerCase &&
+        hasNumber &&
+        hasSpecialChar
+      ) {
+        return true;
+      }
+      return false;
+    }
+
     // Obsługa rejestracji
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
+      const password = formData.get('password');
+
+      if (!validatePassword(password)) {
+        status.innerText = 'Hasło musi zawierać co najmniej 8 znaków, małe i duże litery, liczby oraz znaki specjalne.';
+        return;
+      }
+
       const res = await fetch('/auth/register', {
         method: 'POST',
         body: new URLSearchParams(formData)
@@ -82,22 +109,6 @@
         status.innerText = 'Zarejestrowano! Możesz się zalogować.';
       } else {
         status.innerText = 'Błąd rejestracji.';
-      }
-    });
-
-    // Obsługa resetu hasła
-    document.getElementById('reset-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const res = await fetch('/auth/reset', {
-        method: 'POST',
-        body: new URLSearchParams(formData)
-      });
-
-      if (res.ok) {
-        status.innerText = 'Zresetowano hasło! Nowe: 1234';
-      } else {
-        status.innerText = 'Błąd resetu hasła.';
       }
     });
 

@@ -13,12 +13,12 @@
     </div>
     
     <h1>Odzyskaj hasło</h1>
-    <form id="login-form">
+    <form id="recovery-form">
         <div class="recover-info">
             Jeśli towje konto istnieje, prześlemy tobie instrukcje resetowania hasła.
           </div>
       <div class="input-space">
-        <input type="text" name="Email" placeholder="Email" required>
+        <input type="text" name="email" placeholder="Email" required>
       </div>
       <button type="submit" class="btn">Odzyskaj</button>
     </form>
@@ -28,18 +28,18 @@
   <script>
     const status = document.getElementById('status');
 
-    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+    document.getElementById('recovery-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
-      const res = await fetch('/auth/reset', {
+      const res = await fetch('/auth/forgot-password', {
         method: 'POST',
         body: new URLSearchParams(formData)
       });
 
       if (res.ok) {
-        status.innerText = 'Zresetowano hasło! Nowe: 1234';
+        status.innerText = 'Jeśli podany e-mail istnieje, wysłaliśmy instrukcje resetowania hasła.';
       } else {
-        status.innerText = 'Błąd resetu hasła.';
+        status.innerText = 'Błąd podczas wysyłania instrukcji resetowania hasła.';
       }
     });
   </script>
