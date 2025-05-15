@@ -16,7 +16,7 @@
       background-size: cover;
       background-color: black;
     }
-  
+
     .background{
       height: 500px;
       width: 420px;
@@ -148,7 +148,7 @@
         flex-direction: column; /* Ustawienie okien jedno pod drugim */
     }
 
-    .background,{
+    .background{
         width: 90%; /* Dopasowanie szerokości do ekranu */
         margin-bottom: 20px; /* Odstęp między oknami */
     }
@@ -160,18 +160,18 @@
         padding: 0 5%; /* Jeszcze mniejsze odstępy */
     }
 
-    .background,{
+    .background{
         width: 100%; /* Pełna szerokość ekranu */
     }
 
-    .background h1, {
+    .background h1{
         font-size: 28px; /* Zmniejszenie rozmiaru nagłówków */
     }
 }
 
 /* Dla ekranów o szerokości mniejszej niż 480px */
 @media (max-width: 480px) {
-    .background, {
+    .background{
         padding: 20px; /* Zmniejszenie paddingu */
     }
 
@@ -184,4 +184,16 @@
         height: 40px; /* Zmniejszenie przycisku */
         font-size: 14px; /* Zmniejszenie tekstu w przycisku */
     }
+}
+
+.go-back a {
+  color: inherit; /* Inherit the color from the parent element */
+  text-decoration: none; /* Remove underline */
+  font-size: 30px; /* Set font size */
+  cursor: pointer; /* Change cursor to pointer */
+  user-select: none; /* Prevent text selection */
+}
+
+.go-back a:hover {
+  color: gray; /* Optional: Change color on hover */
 }

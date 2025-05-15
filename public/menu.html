@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="menu_main.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <title>KLIK | Menu gry</title>
 </head>
 <body>
@@ -19,11 +20,18 @@
         <h3>Stwórz gre</h3>
         <label for="difficulty">Wybierz poziom trudności:</label>
         <div class="difficulty-select">
-            <select id="difficulty">
-              <option class="opt" value="easy">Łatwy (3 pary)</option>
-              <option class="opt" value="medium" selected>Średni (6 par)</option>
-              <option class="opt" value="hard">Trudny (12 par)</option>
-            </select>
+            <!--<div id="difficulty">
+               <label for="difficulty">Wybierz poziom trudności:</label>
+                <select id="difficulty">
+                <option value="easy">Łatwy</option>
+                <option value="medium" selected>Średni</option>
+                <option value="hard">Trudny</option>
+                </select>
+                </div>-->
+              <button id="prev-difficulty"><span class="material-symbols-outlined">keyboard_arrow_left</span></button>
+              <option id="difficulty-label" value="medium">Średni (6 par)</option>
+              <button id="next-difficulty"><span class="material-symbols-outlined">keyboard_arrow_right</span></button>
+            </div>
         </div>
         <button id="create-room" class ="btn">Utwórz pokój</button>
       </div>
@@ -55,9 +63,45 @@
     </div>
   </div>
 
-  <button id="logout">Wyloguj</button>
+  <!-- From Uiverse.io by MUJTABA201566 --> 
+
+<button class="Btn" id="logout">
+  <div class="sign">
+    <svg viewBox="0 0 512 512">
+      <path
+        d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
+      ></path>
+    </svg>
+  </div>
+
+  <div class="text">Logout</div>
 
   <script>
+
+    const difficulties = ['Łatwy (3 pary)', 'Średni (6 par)', 'Trudny (12 par)'];
+    const difficultyValues = ['easy', 'medium', 'hard'];
+    let currentIndex = 1; // Start na "Średni"
+
+    const label = document.getElementById('difficulty-label');
+    const prevBtn = document.getElementById('prev-difficulty');
+    const nextBtn = document.getElementById('next-difficulty');
+
+    function updateDifficulty() {
+      label.textContent = difficulties[currentIndex];
+      label.setAttribute('value', difficultyValues[currentIndex]);
+      console.log('Wybrany poziom trudności:', difficultyValues[currentIndex]);
+    }
+
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + difficulties.length) % difficulties.length;
+      updateDifficulty();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % difficulties.length;
+      updateDifficulty();
+    });
+
     const status = document.getElementById('status');
 
     // Sprawdź, czy użytkownik jest zalogowany
@@ -74,9 +118,10 @@
     })();
 
     document.getElementById('create-room').addEventListener('click', async () => {
-      const difficulty = document.getElementById('difficulty').value; // Pobierz wybrany poziom trudności
+      const difficulty = document.getElementById('difficulty-label').value; // Pobierz wybrany poziom trudności
       const res = await fetch('/room/create', { method: 'POST' });
       const data = await res.json();
+      console.log(difficulty);
 
       if (data.success) {
         // Tu można przekierować do strony gry: np. /game.html?code=XYZ123
