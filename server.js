@@ -95,6 +95,62 @@ io.on('connection', (socket) => {
 
   }
 
+  // Funkcja obsługująca zakończenie gry z powodu upływu czasu
+  function handleGameOver(roomCode) {
+    const room = rooms[roomCode];
+    if (!room || room.players.length < 2) return;
+
+    const [player1, player2] = room.players;
+
+    // Porównaj liczbę dopasowań obu graczy
+    const player1Matches = player1.matches || 0;
+    const player2Matches = player2.matches || 0;
+
+    let player1Status, player2Status;
+
+    if (player1Matches > player2Matches) {
+      player1Status = 'Koniec czasu Wygrana';
+      player2Status = 'Koniec czasu Przegrana';
+    } else if (player1Matches < player2Matches) {
+      player1Status = 'Koniec czasu Przegrana';
+      player2Status = 'Koniec czasu Wygrana';
+    } else {
+      player1Status = 'Koniec czasu Remis';
+      player2Status = 'Koniec czasu Remis';
+    }
+
+    // Wyślij wyniki do obu graczy
+    io.to(player1.id).emit('time-up-results', { status: player1Status });
+    io.to(player2.id).emit('time-up-results', { status: player2Status });
+  }
+
+  // Obsługa zakończenia gry z powodu upływu czasu
+  socket.on('game-over', ({ roomCode }) => {
+    handleGameOver(roomCode);
+  });
+
+  // Obsługa zakończenia gry przez gracza
+  socket.on('player-finished', ({ roomCode, playerId, flips, timePlayed, matches }) => {
+    const room = rooms[roomCode];
+    if (!room) return;
+
+    const player = room.players.find(p => p.id === playerId);
+    if (player) {
+      player.flips = flips;
+      player.timePlayed = timePlayed;
+      player.matches = matches;
+    }
+
+    // Jeśli to pierwszy gracz, który kończy grę, przypisz mu status zwycięzcy
+    if (!room.winner) {
+      room.winner = playerId; // Zapisz ID zwycięzcy
+      io.to(playerId).emit('your-results', { flips, timePlayed, matches, isWinner: true });
+    } else {
+      // Jeśli to drugi gracz, przypisz mu status przegranego
+      io.to(playerId).emit('your-results', { flips, timePlayed, matches, isWinner: false });
+    }
+  });
+
   socket.on('disconnect', () => {
     for (const roomCode in rooms) {
       rooms[roomCode].players = rooms[roomCode].players.filter(player => player.id !== socket.id);
@@ -121,7 +177,7 @@ app.get('/', (req, res) => {
   res.send('Serwer działa!');
 });
 
-server.listen(8080, () => console.log('Serwer + Socket.IO działa na http://localhost:3000'));
+server.listen(3000, () => console.log('Serwer + Socket.IO działa na http://localhost:3000'));
 
 app.get('/session/check', (req, res) => {
     if (req.session.user) {
@@ -130,6 +186,28 @@ app.get('/session/check', (req, res) => {
       res.json({ loggedIn: false });
     }
   });
+
+const db = require('./db');
+
+app.post('/game/save-result', async (req, res) => {
+    const { playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime } = req.body;
+
+    try {
+        const [room] = await db.query('SELECT id FROM rooms WHERE code = ?', [roomCode]);
+        if (!room.length) return res.status(404).json({ error: 'Pokój nie znaleziony' });
+
+        const roomId = room[0].id;
+        await db.query(
+            'INSERT INTO results (player_name, room_id, flips, time_played, matches, difficulty, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [playerName, roomId, flips, timePlayed, matches, difficulty, startTime, endTime]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Błąd zapisu wyniku' });
+    }
+});
 
   app.post('/auth/logout', (req, res) => {
     req.session.destroy(() => {

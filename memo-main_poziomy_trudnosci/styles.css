@@ -34,12 +34,17 @@ body {
 
 .game-container {
   margin: 50px auto;
+  max-width: 800px;
+}
+
+#game-container {
   display: grid;
-  grid-template-columns: repeat(4, auto);
+  grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
   grid-gap: 10px;
-  justify-content: center;
+  justify-items: center;
   perspective: 500px;
 }
+
 
 .card {
   position: relative;
@@ -161,7 +166,7 @@ body {
 
 .overlay-text.visible {
   display: flex;
-  animation: overlay-grow 100ms forwards;
+  animation: overlay-grow 500ms forwards;
 }
 
 @keyframes dance {
