@@ -69,7 +69,7 @@ router.post('/forgot-password', async (req, res) => {
   });
 
   // Treść e-maila
-  const resetLink = `http://localhost:3000/reset-password.html?token=${token}`;
+  const resetLink = `https://my-klik-app-e9f0fcd4hhe4atbn.westeurope-01.azurewebsites.net/reset-password.html?token=${token}`;
   const mailOptions = {
     from: 'kliktester78@gmail.com',
     to: email,
