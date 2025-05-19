@@ -264,3 +264,42 @@ h1 {
 .Btn:active {
   transform: translate(2px, 2px);
 }
+
+#logout {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  z-index: 1000;
+}
+
+@media (max-width: 1920px) {
+  .create_room,
+  .join_room {
+    height: 300px;
+    width: 100%;
+    padding: 20px 20px;
+  }
+  .leaderboard {
+    height: 650px;
+    width: 350px;
+    padding: 20px 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container, .box1, .create_room {
+    height: 300px;
+    width: 100%;
+    padding: 20px;
+  }
+  .join_room {
+    height: 300px;
+    width: 100%;
+    padding: 20px;
+  }
+  .leaderboard {
+    height: 500px;
+    width: 100%;
+    padding: 20px;
+  }
+}

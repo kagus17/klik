@@ -350,7 +350,7 @@ function ready() {
     const roomCode = urlParams.get('code');
     const difficulty = urlParams.get('difficulty'); // Pobierz poziom trudności z URL
     const waitingOverlay = document.getElementById('waiting-overlay');
-    const roomCodeDisplay = document.getElementById('room-code-display');
+    const roomCodeDisplay = document.getElementById('room-code-display')
     const waitingMessage = document.getElementById('waiting-message');
     const opponentInfo = document.getElementById('opponent-info');
     const cardContainer = document.getElementById('game-container');
@@ -393,6 +393,17 @@ function ready() {
         hard: 12
     }[difficulty];
 
+    const card_columns = document.getElementById('game-container');
+    let columns = 4;
+
+    if (cardPairsCount === 3) columns = 3;
+    else if (cardPairsCount === 6) columns = 4;
+    else if (cardPairsCount === 12) columns = 6;
+    
+    cardContainer.style.display = 'grid';
+    cardContainer.style.gridGap = '20px';
+    cardContainer.style.gridTemplateColumns = `repeat(${columns}, auto)`;
+
     const selected = cardImages.slice(0, cardPairsCount);
     const allImages = [...selected, ...selected];
 
@@ -408,17 +419,8 @@ function ready() {
         const cardHTML = `
         <div class="card">
             <div class="card-back card-face">
-                <img class="cob-web cob-web-top-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-top-right" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-right" src="Assets/Images/wisienka.png">
-                <img class="w" src="Assets/Images/w.png">
             </div>
             <div class="card-front card-face">
-                <img class="cob-web cob-web-top-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-top-right" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-right" src="Assets/Images/wisienka.png">
                 <img class="card-value" src="Assets/Images/${image}">
             </div>
         </div>`;

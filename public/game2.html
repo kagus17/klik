@@ -7,11 +7,9 @@
   <link href="styles.css" rel="stylesheet">
   <script src="/socket.io/socket.io.js"></script>
   <script src="script.js" async></script>
-  <link rel="shortcut icon" href="Assets/Images/wisienka.png" type="image/png">
-  <title>Wiśniowa Memo</title>
+  <title>KLIK | Gra 1 vs 1</title>
 </head>
 <body onselectstart="return false;">
-  <h1 class="page-title">Memo</h1>
   <div class="overlay-text visible" id="waiting-overlay">
     <div id="room-code-display">Kod pokoju: Ładowanie...</div>
     <div id="waiting-message">Oczekiwanie na przeciwnika...</div>
@@ -34,28 +32,28 @@
     <button id="return-to-menu">Wróć do menu</button>
   </div>
 
-  <div class="game-container">
+  <div class="game-container-data">
+    <div class="game-info">
+      <span id="difficulty-display">Poziom trudności: Ładowanie...</span>
+    </div>
     <div class="game-info-container">
         <div class="game-info">
-          <span id="difficulty-display">Poziom trudności: Ładowanie...</span>
+            Czas <span id="time-remaining">100 </span>
         </div>
         <div class="game-info">
-            Czas <span id="time-remaining">100</span>
-        </div>
-        <div class="game-info">
-            Twoje odwrócenia <span id="flips">0</span>
+            Twoje odwrócenia <span id="flips">0 </span>
         </div>
         <div class="game-info" id="opponent-info" style="display: none;">
-          Odwrócenia <span id="opponent-name">Przeciwnika</span>:<span id="opponent-flips">0</span>
+          Odwrócenia <span id="opponent-name">Przeciwnika</span>:<span id="opponent-flips">0 </span>
         </div>
     </div>
-    
+  </div>
+
     <!-- Dynamic Card Container -->
-     <div id="game-container"></div>
+    <div id="game-container"></div>
       <!-- Karty będą generowane dynamicznie przez JavaScript -->
     </div>
-  </div>
-<footer>Made by </footer>
+
  <script>
     // Event listener for "Return to Menu" button
     document.getElementById('return-to-menu').addEventListener('click', () => {

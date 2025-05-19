@@ -27,7 +27,7 @@
       box-shadow: 0 0 10px black;
       color: white;
       border-radius: 10px;
-      padding:  30px 40px;
+      padding: 15px 10px;
     }
 
     .background h1{
@@ -37,9 +37,9 @@
       
       .background .input-space{
         position: relative;
-        width: 100%;
+        width: 80%;
         height: 50px;
-        margin: 30px 0;
+        margin: 30px 35px;
       }
       
       .input-space input{
@@ -187,9 +187,10 @@
 }
 
 .go-back a {
+  display: flex;
   color: inherit; /* Inherit the color from the parent element */
   text-decoration: none; /* Remove underline */
-  font-size: 30px; /* Set font size */
+  font-size: 40px; /* Set font size */
   cursor: pointer; /* Change cursor to pointer */
   user-select: none; /* Prevent text selection */
 }
