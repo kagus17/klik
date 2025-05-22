@@ -62,6 +62,51 @@
       </tbody>
     </table>
     </div>
+  <div class="last-game">
+  <h3>Ostatnia gra</h3>
+  <table id="last-game-table" style="display:none;">
+    <thead>
+      <tr>
+        <th id="my-name">Ty</th>
+        <th id="opponent-name">Przeciwnik</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="2" id="last-game-result"></td>
+      </tr>
+      <tr>
+        <td id="my-points"></td>
+        <td id="opponent-points"></td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="no-last-game" style="display:none;">Brak rozegranych gier.</div>
+</div>
+<div style="margin-top:10px; text-align:center;">
+    <button id="show-history" class="btn">Historia gier</button>
+  </div>
+  <div id="history-container" style="display:none; margin-top:20px;">
+    <h3>Historia Twoich gier</h3>
+    <table id="history-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Kod pokoju</th>
+          <th>Poziom</th>
+          <th>Dopasowania</th>
+          <th>Odwrócenia</th>
+          <th>Czas (s)</th>
+          <th>Punkty</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Wiersze historii -->
+      </tbody>
+    </table>
+    <div id="no-history" style="display:none;">Brak historii gier.</div>
+    <button id="back-to-last" class="btn" style="margin-top:10px;">Powrót</button>
+  </div>
   </div>
 
   <!-- From Uiverse.io by MUJTABA201566 --> 
@@ -155,6 +200,100 @@
     await fetch('/auth/logout', { method: 'POST' });
     window.location.href = '/index.html';
     });
+
+    // Funkcja do obliczania punktów
+function calculatePoints(matches, time_played) {
+  return matches * 100 - time_played * 2;
+}
+
+// Pobierz i wyświetl ostatnią grę
+(async () => {
+  const res = await fetch('/game/last-result');
+  const data = await res.json();
+
+  const table = document.getElementById('last-game-table');
+  const noGame = document.getElementById('no-last-game');
+  if (!data.found) {
+    noGame.style.display = 'block';
+    table.style.display = 'none';
+    return;
+  }
+
+  const my = data.myResult;
+  const opp = data.opponentResult;
+
+  // Ustaw nazwy
+  document.getElementById('my-name').innerText = my.player_name || 'Ty';
+  document.getElementById('opponent-name').innerText = opp ? opp.player_name : 'Brak';
+
+  // Oblicz punkty
+  const myPoints = calculatePoints(my.matches, my.time_played);
+  const oppPoints = opp ? calculatePoints(opp.matches, opp.time_played) : 0;
+
+  document.getElementById('my-points').innerText = myPoints + ' pkt';
+  document.getElementById('opponent-points').innerText = opp ? (oppPoints + ' pkt') : '-';
+
+  // Ustal wynik
+  let result = '';
+  if (!opp) {
+    result = 'Brak przeciwnika';
+  } else if (
+    myPoints === oppPoints &&
+    my.matches === opp.matches &&
+    my.time_played === opp.time_played
+  ) {
+    result = 'Remis';
+  } else if (myPoints > oppPoints) {
+    result = 'Wygrana';
+  } else {
+    result = 'Przegrana';
+  }
+  document.getElementById('last-game-result').innerText = result;
+
+  table.style.display = '';
+  noGame.style.display = 'none';
+})();
+
+document.getElementById('show-history').addEventListener('click', async () => {
+  document.querySelector('.last-game').style.display = 'none';
+  const historyDiv = document.getElementById('history-container');
+  historyDiv.style.display = '';
+
+  const res = await fetch('/game/history');
+  const data = await res.json();
+
+  const tbody = document.getElementById('history-table').querySelector('tbody');
+  tbody.innerHTML = '';
+
+  if (!data.found) {
+    document.getElementById('no-history').style.display = '';
+    document.getElementById('history-table').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('no-history').style.display = 'none';
+  document.getElementById('history-table').style.display = '';
+
+  data.results.forEach(row => {
+    const points = row.matches * 100 - row.time_played * 2;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${new Date(row.end_time).toLocaleString()}</td>
+      <td>${row.room_id}</td>
+      <td>${row.difficulty}</td>
+      <td>${row.matches}</td>
+      <td>${row.flips}</td>
+      <td>${row.time_played}</td>
+      <td>${points}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+});
+
+document.getElementById('back-to-last').addEventListener('click', () => {
+  document.getElementById('history-container').style.display = 'none';
+  document.querySelector('.last-game').style.display = '';
+});
 
   </script>
 </body>

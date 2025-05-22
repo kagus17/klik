@@ -209,6 +209,52 @@ app.post('/game/save-result', async (req, res) => {
     }
 });
 
+app.get('/game/last-result', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
+
+    const username = req.session.user.username;
+    try {
+        // Pobierz ostatni wynik gracza
+        const [myResults] = await db.query(
+            `SELECT * FROM results WHERE player_name = ? ORDER BY end_time DESC LIMIT 1`, [username]
+        );
+        if (!myResults.length) return res.json({ found: false });
+
+        const myResult = myResults[0];
+
+        // Pobierz wynik przeciwnika z tego samego room_id (ale innego gracza)
+        const [opponentResults] = await db.query(
+            `SELECT * FROM results WHERE room_id = ? AND player_name != ? ORDER BY end_time DESC LIMIT 1`,
+            [myResult.room_id, username]
+        );
+        const opponentResult = opponentResults[0] || null;
+
+        res.json({
+            found: true,
+            myResult,
+            opponentResult
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Błąd pobierania wyniku' });
+    }
+});
+
+app.get('/game/history', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
+
+    const username = req.session.user.username;
+    try {
+        const [results] = await db.query(
+            `SELECT * FROM results WHERE player_name = ? ORDER BY end_time DESC`, [username]
+        );
+        res.json({ found: !!results.length, results });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Błąd pobierania historii' });
+    }
+});
+
   app.post('/auth/logout', (req, res) => {
     req.session.destroy(() => {
       res.json({ success: true });

@@ -103,7 +103,7 @@ socket.on('time-up-results', ({ status }) => {
     const resultsTitle = document.getElementById('results-title');
     resultsTitle.innerText = status;
     modal.classList.remove('hidden');
-    modal.classList.add('visible');
+    modal.classList.add('visible')
 });
 
              // Dodaj obsługę zdarzenia 'game-results'
@@ -447,11 +447,13 @@ function ready() {
         });
 
         socket.on('opponent-disconnected', () => {
-            waitingMessage.textContent = 'Przeciwnik opuścił grę. Przekierowanie...';
-            setTimeout(() => {
-                window.location.href = '/menu.html';
-            }, 3000);
-        });
+    const notification = document.getElementById('notification');
+    notification.textContent = 'Przeciwnik opuścił grę.';
+    notification.style.display = 'block';
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 5000); // Powiadomienie znika po 5 sekundach
+});
     }
     /*let overlays = Array.from(document.getElementsByClassName('overlay-text'));
     let cards = Array.from(document.getElementsByClassName('card'));
