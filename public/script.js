@@ -1,3 +1,10 @@
+let csrfToken = '';
+(async () => {
+    const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
+    const data = await res.json();
+    csrfToken = data.csrfToken;
+})();
+
 class AudioController {
     constructor() {
         this.bgMusic = new Audio('Assets/Audio/ark.mp3');
@@ -332,7 +339,11 @@ function showResultsModal(playerName, flips, timePlayed, matches, isWinner) {
 function saveResult(playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime) {
     fetch('/game/save-result', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'CSRF-Token': csrfToken
+        },
+        credentials: 'same-origin',
         body: JSON.stringify({ playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime })
     }).then(res => res.json())
       .then(data => {
