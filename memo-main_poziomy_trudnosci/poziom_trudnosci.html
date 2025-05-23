@@ -1,50 +1,54 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Wybierz poziom – Wiśniowa Memo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="styles.css" rel="stylesheet">
+  <title>Wybierz poziom trudności</title>
   <style>
     body {
-      font-family: Jazz LET, fantasy;
-      background: radial-gradient(#ffd9de, #3c0001);
-      color: #3c0001;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #1c1c1c, #3a3a3a);
+      color: white;
+      font-family: "Noto Sans", sans-serif;
       text-align: center;
-      padding-top: 100px;
     }
 
     h1 {
-      font-size: 4em;
-      margin-bottom: 40px;
+      font-size: 3em;
+      margin-bottom: 30px;
     }
 
-    .btn {
-      display: block;
-      width: 200px;
-      margin: 20px auto;
-      padding: 15px;
+    .difficulty-button {
       font-size: 1.5em;
-      background-color: #ffd9de;
-      border: 3px solid #3c0001;
-      border-radius: 20px;
+      padding: 15px 40px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      background-color: #955f46;
+      color: white;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: background-color 0.3s ease;
     }
 
-    .btn:hover {
-      transform: scale(1.05);
+    .difficulty-button:hover {
+      background-color: #b57c64;
     }
   </style>
 </head>
 <body>
-  <h1>Wybierz poziom</h1>
-
-  <button class="btn" onclick="startGame('easy')">Łatwy (3 pary)</button>
-  <button class="btn" onclick="startGame('medium')">Średni (6 par)</button>
-  <button class="btn" onclick="startGame('hard')">Trudny (12 par)</button>
+  <h1>Wybierz poziom trudności</h1>
+  <button class="difficulty-button" onclick="setDifficulty('easy')">Łatwy</button>
+  <button class="difficulty-button" onclick="setDifficulty('medium')">Średni</button>
+  <button class="difficulty-button" onclick="setDifficulty('hard')">Trudny</button>
 
   <script>
-    function startGame(difficulty) {
-      localStorage.setItem('memoDifficulty', difficulty);
+    function setDifficulty(level) {
+      localStorage.setItem('memoDifficulty', level);
       window.location.href = 'index.html';
     }
   </script>
