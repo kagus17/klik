@@ -87,7 +87,7 @@
 
     // Funkcja do obliczania punktów
 function calculatePoints(matches, time_played) {
-  return matches * 100 - time_played * 2;
+  return matches * (100-time_played);
 }
 
 // Pobierz i wyświetl ostatnią grę

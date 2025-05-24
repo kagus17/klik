@@ -103,7 +103,7 @@ io.on('connection', (socket) => {
     socket.join(roomCode);
 
     if (!rooms[roomCode]) {
-      rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: difficulty === 'hard' ? 60 : 100 };
+      rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: 100 };
     }
 
     rooms[roomCode].players.push({ id: socket.id, username });

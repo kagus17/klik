@@ -65,7 +65,12 @@ class MixOrMatch {
 
         if (this.isMultiplayer) {
             // Wyświetl poziom trudności
-            this.difficultyDisplay.innerText = `Poziom trudności: ${this.difficulty}`;
+            const difficultyNamesPL = {
+                easy: 'Łatwy',
+                medium: 'Średni',
+                hard: 'Trudny'
+            };
+            this.difficultyDisplay.innerText = `Poziom trudności: ${difficultyNamesPL[this.difficulty] || this.difficulty}`;
 
             socket.on('time-update', ({ timeRemaining }) => {
                 this.timeRemaining = timeRemaining;
@@ -377,14 +382,25 @@ function ready() {
             }
         });
 
+        const difficultyNamesPL = {
+            easy: 'Łatwy',
+            medium: 'Średni',
+            hard: 'Trudny'
+        };
         // Wyświetl kod pokoju i poziom trudności
-        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
+        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficultyNamesPL[difficulty] || difficulty}`;
         
         // Wyślij dane do serwera
         socket.emit('join-room', { roomCode, difficulty });
 
         socket.on('room-created', ({ roomCode, difficulty }) => {
-            roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
+            const difficultyNamesPL = {
+            easy: 'Łatwy',
+            medium: 'Średni',
+            hard: 'Trudny'
+        };
+        // Wyświetl kod pokoju i poziom trudności
+        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficultyNamesPL[difficulty] || difficulty}`;
         });
         
         socket.on('game-start', ({ difficulty }) => {
@@ -446,7 +462,7 @@ function ready() {
         console.log('CardsMulti:', cardsMulti);
 
             // Rozpocznij grę z odpowiednim poziomem trudności
-            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, cardsMulti, loggedInUsername);
+            const game = new MixOrMatch(difficulty,100, cardsMulti, loggedInUsername);
             game.startGame();
 
             // Dodaj nasłuchiwanie na kliknięcia kart
