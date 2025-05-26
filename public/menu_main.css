@@ -6,7 +6,7 @@
 
 body {
   display: flex;
-  min-height: 100vh;
+  min-height: 98vh;
   padding: 0 25%;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
   background-position: center;
@@ -196,6 +196,8 @@ h1 {
     }
 
     #difficulty button {
+      display: flex;
+      align-items: center;
   width: 70%;
   height: 45px;
   background: white;
