@@ -4,7 +4,7 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'gra1v1'
+  database: 'gra1v1NEW'
 });
 /*
 const fs = require('fs');

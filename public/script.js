@@ -1,3 +1,10 @@
+let csrfToken = '';
+(async () => {
+    const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
+    const data = await res.json();
+    csrfToken = data.csrfToken;
+})();
+
 class AudioController {
     constructor() {
         this.bgMusic = new Audio('Assets/Audio/ark.mp3');
@@ -58,7 +65,12 @@ class MixOrMatch {
 
         if (this.isMultiplayer) {
             // Wyświetl poziom trudności
-            this.difficultyDisplay.innerText = `Poziom trudności: ${this.difficulty}`;
+            const difficultyNamesPL = {
+                easy: 'Łatwy',
+                medium: 'Średni',
+                hard: 'Trudny'
+            };
+            this.difficultyDisplay.innerText = `Poziom trudności: ${difficultyNamesPL[this.difficulty] || this.difficulty}`;
 
             socket.on('time-update', ({ timeRemaining }) => {
                 this.timeRemaining = timeRemaining;
@@ -103,7 +115,7 @@ socket.on('time-up-results', ({ status }) => {
     const resultsTitle = document.getElementById('results-title');
     resultsTitle.innerText = status;
     modal.classList.remove('hidden');
-    modal.classList.add('visible');
+    modal.classList.add('visible')
 });
 
              // Dodaj obsługę zdarzenia 'game-results'
@@ -332,7 +344,11 @@ function showResultsModal(playerName, flips, timePlayed, matches, isWinner) {
 function saveResult(playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime) {
     fetch('/game/save-result', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'CSRF-Token': csrfToken
+        },
+        credentials: 'same-origin',
         body: JSON.stringify({ playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime })
     }).then(res => res.json())
       .then(data => {
@@ -366,14 +382,25 @@ function ready() {
             }
         });
 
+        const difficultyNamesPL = {
+            easy: 'Łatwy',
+            medium: 'Średni',
+            hard: 'Trudny'
+        };
         // Wyświetl kod pokoju i poziom trudności
-        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
+        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficultyNamesPL[difficulty] || difficulty}`;
         
         // Wyślij dane do serwera
         socket.emit('join-room', { roomCode, difficulty });
 
         socket.on('room-created', ({ roomCode, difficulty }) => {
-            roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficulty}`;
+            const difficultyNamesPL = {
+            easy: 'Łatwy',
+            medium: 'Średni',
+            hard: 'Trudny'
+        };
+        // Wyświetl kod pokoju i poziom trudności
+        roomCodeDisplay.textContent = `Kod pokoju: ${roomCode} | Poziom trudności: ${difficultyNamesPL[difficulty] || difficulty}`;
         });
         
         socket.on('game-start', ({ difficulty }) => {
@@ -435,7 +462,7 @@ function ready() {
         console.log('CardsMulti:', cardsMulti);
 
             // Rozpocznij grę z odpowiednim poziomem trudności
-            const game = new MixOrMatch(difficulty,difficulty === 'hard' ? 60 : 100, cardsMulti, loggedInUsername);
+            const game = new MixOrMatch(difficulty,100, cardsMulti, loggedInUsername);
             game.startGame();
 
             // Dodaj nasłuchiwanie na kliknięcia kart
@@ -446,12 +473,19 @@ function ready() {
             });
         });
 
+        socket.on('kicked', () => {
+  alert('Nie możesz wrócić do tej gry po odświeżeniu strony.');
+  window.location.href = '/menu.html';
+});
+
         socket.on('opponent-disconnected', () => {
-            waitingMessage.textContent = 'Przeciwnik opuścił grę. Przekierowanie...';
-            setTimeout(() => {
-                window.location.href = '/menu.html';
-            }, 3000);
-        });
+    const notification = document.getElementById('notification');
+    notification.textContent = 'Przeciwnik opuścił grę.';
+    notification.style.display = 'block';
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 5000); // Powiadomienie znika po 5 sekundach
+});
     }
     /*let overlays = Array.from(document.getElementsByClassName('overlay-text'));
     let cards = Array.from(document.getElementsByClassName('card'));

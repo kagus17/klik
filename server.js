@@ -4,26 +4,51 @@ const sharedSession = require('socket.io-express-session');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const csurf = require('csurf');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+const MySQLStore = require('express-mysql-session')(session);
+const dbConfig = {
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'gra1v1NEW'
+};
+const sessionStore = new MySQLStore(dbConfig);
+
 const sessionMiddleware = session({
   secret: 'tajny-klucz',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: sessionStore, // <-- dodaj to
+  cookie: {
+    httpOnly: true,
+    secure: false, // ustaw na true jeśli masz HTTPS
+    sameSite: 'lax'
+  }
 });
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(sessionMiddleware);
+
+app.use(csurf());
+
+app.use((err, req, res, next) => {
+  if (err.code === 'EBADCSRFTOKEN') {
+    return res.status(403).json({ error: 'Błąd CSRF. Odśwież stronę.' });
+  }
+  next(err);
+});
 
 // Udostępnij sesję w Socket.IO
 io.use(sharedSession(sessionMiddleware, {
   autoSave: true
 }));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 /*app.use(session({
   secret: 'tajny-klucz',
@@ -40,32 +65,76 @@ app.use((req, res, next) => {
   next();
 });*/
 
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self';");
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/auth', require('./routes/auth'));
 app.use('/room', require('./routes/room'));
+const leaderboardRoutes = require('./routes/leaderboard');
+app.use(leaderboardRoutes);
 
 // Socket.IO logika
 const rooms = {}; // Przechowuje listy socket.id dla każdego pokoju
 
 io.on('connection', (socket) => {
-  console.log('Połączono:', socket.id);
+  const user = socket.handshake.session.user;
+  if (!user) {
+    console.log('Brak usera w sesji');
+    socket.disconnect();
+    return;
+  }
 
-  socket.on('join-room', ({roomCode, difficulty}) => {
+  socket.on('join-room', async ({roomCode, difficulty}) => {
+    if (!rooms[roomCode]) {
+      rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: 100, kicked: [] };
+    }
+  const room = rooms[roomCode];
+  const username = socket.handshake.session?.user?.username;
+  // Dodaj allowed jeśli nie istnieje (pierwszy gracz)
+if (!room.allowed) {
+  room.allowed = [username];
+}
+// Dodaj drugiego gracza do allowed
+if (room.allowed.length < 2 && !room.allowed.includes(username)) {
+  room.allowed.push(username);
+}
+
+// Teraz sprawdzaj uprawnienia
+if (!room.allowed.includes(username)) {
+  socket.emit('kicked');
+  return;
+}
+if (room.kicked && room.kicked.includes(username)) {
+  socket.emit('kicked');
+  return;
+}
+
+
+    console.log('join-room event odebrany', roomCode, difficulty);
+     if (typeof roomCode !== 'string') {
+      console.log('Nieprawidłowe dane wejściowe');
+    socket.emit('error', 'Nieprawidłowe dane wejściowe.');
+    return;
+  }
+  if (!username) {
+    console.log('Brak username');
+    socket.emit('error', 'Brak autoryzacji.');
+    return;
+  }
+
     socket.join(roomCode);
 
-    if (!rooms[roomCode]) {
-      rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: difficulty === 'hard' ? 60 : 100 };
-    }
-
-    const username = socket.handshake.session?.user?.username || 'Anonim';
     rooms[roomCode].players.push({ id: socket.id, username });
 
      // Powiadom pierwszego gracza o kodzie pokoju i poziomie trudności
      if (rooms[roomCode].players.length === 1) {
       io.to(socket.id).emit('room-created', { roomCode, difficulty: rooms[roomCode].difficulty });
     }
-    
+    console.log(rooms[roomCode].players.length);
   // Gdy dwóch graczy dołączy, rozpocznij grę
   if (rooms[roomCode].players.length === 2) {
     const player1 = rooms[roomCode].players[0];
@@ -83,6 +152,9 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('game-start', { difficulty: rooms[roomCode].difficulty });
 
     // Rozpocznij odliczanie czasu gry
+    if (rooms[roomCode].interval) {
+  clearInterval(rooms[roomCode].interval);
+  }
     rooms[roomCode].interval = setInterval(() => {
       rooms[roomCode].timeRemaining--;
       io.to(roomCode).emit('time-update', { timeRemaining: rooms[roomCode].timeRemaining });
@@ -126,11 +198,22 @@ io.on('connection', (socket) => {
 
   // Obsługa zakończenia gry z powodu upływu czasu
   socket.on('game-over', ({ roomCode }) => {
+    if (typeof roomCode !== 'string') return;
     handleGameOver(roomCode);
   });
 
   // Obsługa zakończenia gry przez gracza
   socket.on('player-finished', ({ roomCode, playerId, flips, timePlayed, matches }) => {
+    if (
+    typeof roomCode !== 'string' ||
+    typeof playerId !== 'string' ||
+    typeof flips !== 'number' ||
+    typeof timePlayed !== 'number' ||
+    typeof matches !== 'number'
+  ) {
+    socket.emit('error', 'Nieprawidłowe dane wejściowe.');
+    return;
+  }
     const room = rooms[roomCode];
     if (!room) return;
 
@@ -151,24 +234,32 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('disconnect', () => {
-    for (const roomCode in rooms) {
-      rooms[roomCode].players = rooms[roomCode].players.filter(player => player.id !== socket.id);
-      if (rooms[roomCode].players.length === 0) {
-        clearInterval(rooms[roomCode].interval);
-        delete rooms[roomCode];
-      } else {
-        io.to(roomCode).emit('opponent-disconnected');
-      }
+ socket.on('disconnect', () => {
+  for (const roomCode in rooms) {
+    const room = rooms[roomCode];
+    // Dodaj username do listy wyrzuconych
+    const username = socket.handshake.session?.user?.username;
+    if (username) {
+      room.kicked = room.kicked || [];
+      room.kicked.push(username);
     }
-  });
+    // Usuń gracza z listy
+    room.players = room.players.filter(player => player.id !== socket.id);
+
+    // Powiadom drugiego gracza
+    io.to(roomCode).emit('opponent-disconnected');
+    // NIE usuwaj pokoju!
+  }
+});
 });
 
   socket.on('click', ({ roomCode, clicks }) => {
+    if (typeof roomCode !== 'string' || typeof clicks !== 'number') return;
     socket.to(roomCode).emit('opponent-clicked', clicks);
   });
 
   socket.on('game-over', ({ roomCode}) => {
+    if (typeof roomCode !== 'string') return;
     socket.to(roomCode).emit('game-ended');
   });
 });
@@ -209,9 +300,64 @@ app.post('/game/save-result', async (req, res) => {
     }
 });
 
+app.get('/game/last-result', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
+
+    const username = req.session.user.username;
+    try {
+        // Pobierz ostatni wynik gracza
+        const [myResults] = await db.query(
+            `SELECT * FROM results WHERE player_name = ? ORDER BY end_time DESC LIMIT 1`, [username]
+        );
+        if (!myResults.length) return res.json({ found: false });
+
+        const myResult = myResults[0];
+
+        // Pobierz wynik przeciwnika z tego samego room_id (ale innego gracza)
+        const [opponentResults] = await db.query(
+            `SELECT * FROM results WHERE room_id = ? AND player_name != ? ORDER BY end_time DESC LIMIT 1`,
+            [myResult.room_id, username]
+        );
+        const opponentResult = opponentResults[0] || null;
+
+        res.json({
+            found: true,
+            myResult,
+            opponentResult
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Błąd pobierania wyniku' });
+    }
+});
+
+app.get('/game/history', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
+
+    const username = req.session.user.username;
+    try {
+        const [results] = await db.query(
+             `SELECT 
+                r1.*, 
+                (SELECT player_name FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_name,
+                (SELECT matches FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_matches,
+                (SELECT flips FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_flips,
+                (SELECT time_played FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_time_played
+             FROM results r1
+             WHERE r1.player_name = ?
+             ORDER BY r1.end_time DESC`, 
+            [username]
+        );
+        res.json({ found: !!results.length, results });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Błąd pobierania historii' });
+    }
+});
+
   app.post('/auth/logout', (req, res) => {
     req.session.destroy(() => {
       res.json({ success: true });
     });
   });
-  
+

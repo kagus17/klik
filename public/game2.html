@@ -11,9 +11,9 @@
 </head>
 <body onselectstart="return false;">
   <div class="overlay-text visible" id="waiting-overlay">
-    <div id="room-code-display">Kod pokoju: Ładowanie...</div>
+    <div id="room-code-display" style="cursor:pointer" title="Kliknij, aby skopiować kod">Kod pokoju: Ładowanie...</div>
     <div id="waiting-message">Oczekiwanie na przeciwnika...</div>
-</div>
+  </div>
   <div id="game-over-text" class="overlay-text">
     Koniec gry
     <span class="overlay-text-small">Naciśnij aby ponownie rozpocząć gre</span>
@@ -54,11 +54,8 @@
       <!-- Karty będą generowane dynamicznie przez JavaScript -->
     </div>
 
- <script>
-    // Event listener for "Return to Menu" button
-    document.getElementById('return-to-menu').addEventListener('click', () => {
-      window.location.href = '/menu.html';
-    });
-  </script>
+    <div id="notification"></div>
+
+ <script src="game2.js"></script>
 </body>
 </html>

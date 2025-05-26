@@ -47,6 +47,7 @@
     </div>
   </div>
 
+  <div class = "box2">
   <div class = "leaderboard">
     <h3>Najlepsze wyniki</h3>
     <table id="leaderboard">
@@ -60,10 +61,74 @@
         <!-- Tutaj będą wstawiane wyniki -->
       </tbody>
     </table>
-    </div>
   </div>
+  <div class="last-game">
+  <h3>Ostatnia gra</h3>
+  <table id="last-game-table">
+    <thead>
+      <tr>
+        <th id="my-name">Ty</th>
+        <th id="opponent-name">Przeciwnik</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="2" id="last-game-result"></td>
+      </tr>
+      <tr>
+        <td id="my-points"></td>
+        <td id="opponent-points"></td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="no-last-game">Brak rozegranych gier.</div>
+</div>
+</div>
+  
+<!-- Przyciemnienie tła -->
+<div id="history-overlay"></div>
+  <div id="history-container">
+    <div class="history-info">
+  <h3>Historia Twoich gier</h3>
+  <table id="history-table">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Przeciwnik</th>
+        <th>Poziom</th>
+        <th>Dopasowania</th>
+        <th>Odwrócenia</th>
+        <th>Czas (s)</th>
+        <th>Punkty</th>
+        <th>Wynik</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Wiersze historii -->
+    </tbody>
+  </table>
+  <div id="no-history">Brak historii gier.</div>
+    </div>
+    <div class="back">
+  <button id="back-to-last" class="btn">Powrót</button>
+  </div>
+</div>
+
 
   <!-- From Uiverse.io by MUJTABA201566 --> 
+
+  <div class = btn-menu>
+
+  <button class="Btn" id="historii">
+  <div class="sign">
+    <svg viewBox="0 0 6.35 6.35" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M2.43.265c-.3 0-.548.236-.573.53h-.328a.74.74 0 0 0-.735.734v3.822a.74.74 0 0 0 .735.734H4.82a.74.74 0 0 0 .735-.734V1.529a.74.74 0 0 0-.735-.735h-.328a.58.58 0 0 0-.573-.53zm0 .529h1.49c.032 0 .049.017.049.049v.431c0 .032-.017.049-.049.049H2.43c-.032 0-.05-.017-.05-.049V.843c0-.032.018-.05.05-.05zm-.901.53h.328c.026.292.274.528.573.528h1.49a.58.58 0 0 0 .573-.529h.328a.2.2 0 0 1 .206.206v3.822a.2.2 0 0 1-.206.205H1.53a.2.2 0 0 1-.206-.205V1.529a.2.2 0 0 1 .206-.206z"
+      ></path>
+    </svg>
+  </div>
+  <div class="text">Historia gier</div>
+
 
 <button class="Btn" id="logout">
   <div class="sign">
@@ -73,88 +138,9 @@
       ></path>
     </svg>
   </div>
+    <div class="text">Wyloguj</div>
+      </div>
 
-  <div class="text">Logout</div>
-
-  <script>
-
-    const difficulties = ['Łatwy (3 pary)', 'Średni (6 par)', 'Trudny (12 par)'];
-    const difficultyValues = ['easy', 'medium', 'hard'];
-    let currentIndex = 1; // Start na "Średni"
-
-    const label = document.getElementById('difficulty-label');
-    const prevBtn = document.getElementById('prev-difficulty');
-    const nextBtn = document.getElementById('next-difficulty');
-
-    function updateDifficulty() {
-      label.textContent = difficulties[currentIndex];
-      label.setAttribute('value', difficultyValues[currentIndex]);
-      console.log('Wybrany poziom trudności:', difficultyValues[currentIndex]);
-    }
-
-    prevBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex - 1 + difficulties.length) % difficulties.length;
-      updateDifficulty();
-    });
-
-    nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % difficulties.length;
-      updateDifficulty();
-    });
-
-    const status = document.getElementById('status');
-
-    // Sprawdź, czy użytkownik jest zalogowany
-    (async () => {
-    const res = await fetch('/session/check');
-    const data = await res.json();
-
-    if (!data.loggedIn) {
-      alert('Musisz być zalogowany!');
-      window.location.href = '/index.html';
-    } else {
-      status.innerText = `Witaj ${data.username}`;
-    }
-    })();
-
-    document.getElementById('create-room').addEventListener('click', async () => {
-      const difficulty = document.getElementById('difficulty-label').value; // Pobierz wybrany poziom trudności
-      const res = await fetch('/room/create', { method: 'POST' });
-      const data = await res.json();
-      console.log(difficulty);
-
-      if (data.success) {
-        // Tu można przekierować do strony gry: np. /game.html?code=XYZ123
-        window.location.href = `/game2.html?code=${data.code}&difficulty=${difficulty}`; // Dodaj poziom trudności do URL
-      } else {
-        status.innerText = 'Nie udało się utworzyć pokoju.';
-      }
-    });
-
-    document.getElementById('join-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const res = await fetch('/room/join', {
-        method: 'POST',
-        body: new URLSearchParams(formData)
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        status.innerText = 'Dołączono do pokoju!';
-        // Tu można przekierować do gry
-        window.location.href = `/game2.html?code=${formData.get('code')}`;
-      } else {
-        status.innerText = 'Błąd: Nie udało się dołączyć do pokoju.';
-      }
-    });
-
-    document.getElementById('logout').addEventListener('click', async () => {
-    await fetch('/auth/logout', { method: 'POST' });
-    window.location.href = '/index.html';
-    });
-
-  </script>
+  <script src="menu.js"></script>
 </body>
 </html>
