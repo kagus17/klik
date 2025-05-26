@@ -162,15 +162,39 @@ document.getElementById('show-history').addEventListener('click', async () => {
 
   data.results.forEach(row => {
     const points = row.matches * (100 - row.time_played);
+    const opponent = row.opponent_name || 'Brak';
+
+  // Oblicz punkty przeciwnika tylko jeśli są dane
+  const oppPoints = (row.opponent_matches != null && row.opponent_time_played != null)
+    ? calculatePoints(row.opponent_matches, row.opponent_time_played)
+    : null;
+
+  // Ustal wynik
+let result = '';
+if (!row.opponent_name) {
+  result = 'Brak przeciwnika';
+} else if (
+  points === oppPoints &&
+  row.matches === row.opponent_matches &&
+  row.time_played === row.opponent_time_played
+) {
+  result = 'Remis';
+} else if (points > oppPoints) {
+  result = 'Wygrana';
+} else {
+  result = 'Przegrana';
+}
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${new Date(row.end_time).toLocaleString()}</td>
-      <td>${row.room_id}</td>
+      <td>${opponent}</td>
       <td>${row.difficulty}</td>
       <td>${row.matches}</td>
       <td>${row.flips}</td>
       <td>${row.time_played}</td>
       <td>${points}</td>
+      <td>${result}</td>
     `;
     tbody.appendChild(tr);
   });

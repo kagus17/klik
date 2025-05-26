@@ -126,14 +126,6 @@ if (room.kicked && room.kicked.includes(username)) {
 
     socket.join(roomCode);
 
-    if (!rooms[roomCode].allowed) {
-  rooms[roomCode].allowed = [username]; // pierwszy gracz
-}
-
-if (rooms[roomCode].allowed.length < 2 && !rooms[roomCode].allowed.includes(username)) {
-  rooms[roomCode].allowed.push(username); // drugi gracz
-}
-
     rooms[roomCode].players.push({ id: socket.id, username });
 
      // Powiadom pierwszego gracza o kodzie pokoju i poziomie trudności
@@ -343,7 +335,16 @@ app.get('/game/history', async (req, res) => {
     const username = req.session.user.username;
     try {
         const [results] = await db.query(
-            `SELECT * FROM results WHERE player_name = ? ORDER BY end_time DESC`, [username]
+             `SELECT 
+                r1.*, 
+                (SELECT player_name FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_name,
+                (SELECT matches FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_matches,
+                (SELECT flips FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_flips,
+                (SELECT time_played FROM results r2 WHERE r2.room_id = r1.room_id AND r2.player_name != r1.player_name LIMIT 1) AS opponent_time_played
+             FROM results r1
+             WHERE r1.player_name = ?
+             ORDER BY r1.end_time DESC`, 
+            [username]
         );
         res.json({ found: !!results.length, results });
     } catch (err) {
