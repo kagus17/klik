@@ -130,6 +130,9 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('game-start', { difficulty: rooms[roomCode].difficulty });
 
     // Rozpocznij odliczanie czasu gry
+    if (rooms[roomCode].interval) {
+  clearInterval(rooms[roomCode].interval);
+  }
     rooms[roomCode].interval = setInterval(() => {
       rooms[roomCode].timeRemaining--;
       io.to(roomCode).emit('time-update', { timeRemaining: rooms[roomCode].timeRemaining });
