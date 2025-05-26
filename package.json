@@ -12,6 +12,7 @@
         "express-session": "^1.18.1",
         "mysql2": "^3.14.0",
         "nodemailer": "^7.0.3",
+        "react-toastify": "^11.0.5",
         "socket.io": "^4.8.1",
         "socket.io-express-session": "^0.1.3"
     }
