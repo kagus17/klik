@@ -6,6 +6,8 @@
   csrfToken = data.csrfToken;
 })();
 
+document.getElementById('history-container').style.display = 'none'; // Ukryj historię na początku
+
     const difficulties = ['Łatwy (3 pary)', 'Średni (6 par)', 'Trudny (12 par)'];
     const difficultyValues = ['easy', 'medium', 'hard'];
     let currentIndex = 1; // Start na "Średni"
@@ -159,7 +161,7 @@ document.getElementById('show-history').addEventListener('click', async () => {
   document.getElementById('history-table').style.display = '';
 
   data.results.forEach(row => {
-    const points = row.matches * 100 - row.time_played * 2;
+    const points = row.matches * (100 - row.time_played);
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${new Date(row.end_time).toLocaleString()}</td>

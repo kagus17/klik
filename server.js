@@ -87,13 +87,37 @@ io.on('connection', (socket) => {
   }
 
   socket.on('join-room', async ({roomCode, difficulty}) => {
+    if (!rooms[roomCode]) {
+      rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: 100, kicked: [] };
+    }
+  const room = rooms[roomCode];
+  const username = socket.handshake.session?.user?.username;
+  // Dodaj allowed jeśli nie istnieje (pierwszy gracz)
+if (!room.allowed) {
+  room.allowed = [username];
+}
+// Dodaj drugiego gracza do allowed
+if (room.allowed.length < 2 && !room.allowed.includes(username)) {
+  room.allowed.push(username);
+}
+
+// Teraz sprawdzaj uprawnienia
+if (!room.allowed.includes(username)) {
+  socket.emit('kicked');
+  return;
+}
+if (room.kicked && room.kicked.includes(username)) {
+  socket.emit('kicked');
+  return;
+}
+
+
     console.log('join-room event odebrany', roomCode, difficulty);
      if (typeof roomCode !== 'string') {
       console.log('Nieprawidłowe dane wejściowe');
     socket.emit('error', 'Nieprawidłowe dane wejściowe.');
     return;
   }
-    const username = socket.handshake.session?.user?.username;
   if (!username) {
     console.log('Brak username');
     socket.emit('error', 'Brak autoryzacji.');
@@ -102,9 +126,13 @@ io.on('connection', (socket) => {
 
     socket.join(roomCode);
 
-    if (!rooms[roomCode]) {
-      rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: 100 };
-    }
+    if (!rooms[roomCode].allowed) {
+  rooms[roomCode].allowed = [username]; // pierwszy gracz
+}
+
+if (rooms[roomCode].allowed.length < 2 && !rooms[roomCode].allowed.includes(username)) {
+  rooms[roomCode].allowed.push(username); // drugi gracz
+}
 
     rooms[roomCode].players.push({ id: socket.id, username });
 
@@ -212,17 +240,23 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('disconnect', () => {
-    for (const roomCode in rooms) {
-      rooms[roomCode].players = rooms[roomCode].players.filter(player => player.id !== socket.id);
-      if (rooms[roomCode].players.length === 0) {
-        clearInterval(rooms[roomCode].interval);
-        delete rooms[roomCode];
-      } else {
-        io.to(roomCode).emit('opponent-disconnected');
-      }
+ socket.on('disconnect', () => {
+  for (const roomCode in rooms) {
+    const room = rooms[roomCode];
+    // Dodaj username do listy wyrzuconych
+    const username = socket.handshake.session?.user?.username;
+    if (username) {
+      room.kicked = room.kicked || [];
+      room.kicked.push(username);
     }
-  });
+    // Usuń gracza z listy
+    room.players = room.players.filter(player => player.id !== socket.id);
+
+    // Powiadom drugiego gracza
+    io.to(roomCode).emit('opponent-disconnected');
+    // NIE usuwaj pokoju!
+  }
+});
 });
 
   socket.on('click', ({ roomCode, clicks }) => {

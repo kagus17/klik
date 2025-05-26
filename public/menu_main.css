@@ -121,6 +121,19 @@ h1 {
   padding: 30px 40px;
 }
 
+
+
+#history-container {
+  color: white ;
+  margin-top:20px;
+  overflow-y: auto;       /* pionowy suwak */
+  overflow-x: auto;       /* poziomy suwak, jeśli tabela jest szeroka */
+}
+
+#no-history {
+  display: none;
+}
+
 .input-space {
   position: relative;
   width: 70%;

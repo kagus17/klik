@@ -473,6 +473,11 @@ function ready() {
             });
         });
 
+        socket.on('kicked', () => {
+  alert('Nie możesz wrócić do tej gry po odświeżeniu strony.');
+  window.location.href = '/menu.html';
+});
+
         socket.on('opponent-disconnected', () => {
     const notification = document.getElementById('notification');
     notification.textContent = 'Przeciwnik opuścił grę.';
