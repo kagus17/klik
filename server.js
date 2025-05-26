@@ -16,7 +16,8 @@ const dbConfig = {
   user: 'root',
   password: '',
   database: 'gra1v1NEW'
-};
+}
+
 const sessionStore = new MySQLStore(dbConfig);
 
 const sessionMiddleware = session({

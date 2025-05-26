@@ -1,4 +1,5 @@
 let csrfToken = '';
+
 (async () => {
   const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
   const data = await res.json();
@@ -244,3 +245,9 @@ document.getElementById('historii').addEventListener('click', async () => {
 
   // ...jeśli chcesz ładować historię AJAXem, zostaw resztę kodu...
 });
+
+document.getElementById('back-to-last').addEventListener('click', () => {
+  document.getElementById('history-container').style.display = 'none';
+  document.querySelector('.last-game').style.display = '';
+});
+

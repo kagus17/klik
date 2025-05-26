@@ -5,17 +5,20 @@
 html {
   min-height: 100vh;
   cursor: url(Assets/Cursors/kursor.png), auto;
-  font-family: Jazz LET, fantasy;
+  font-family: "Noto Sans", sans-serif;
 }
 
 body {
   margin: 0;
-  background: radial-gradient(#ffd9de, #3c0001);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
+  background-position: center;
+  background-size: cover;
+  background-color: black;
 }
 
 .page-title {
-  color: #3c0001;
-  font-family: Jazz LET, fantasy;
+  color: #ffffff;
+  font-family: "Noto Sans", sans-serif;
   font-weight: normal;
   text-align: center;
   font-size: 6em;
@@ -28,7 +31,7 @@ body {
 }
 
 .game-info {
-  color: #3c0001;
+  color: #ffffff;
   font-size: 2em;
 }
 
@@ -139,8 +142,8 @@ body {
 }
 
 .card-front {
-  background-color: #ffd9de;
-  border-color: #3c0001;
+  background-color: #f7e7ce;
+  border-color: #955f46;
   transform: rotateY(180deg);
 }
 
@@ -155,8 +158,8 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  color: #ffd9de;
-  font-family: Jazz LET, fantasy;
+  color: #ffffff;
+  font-family: "Noto Sans", sans-serif;
   transition: background-color 500ms, font-size 500ms;
 }
 
@@ -214,8 +217,8 @@ body {
 }
 
 footer {
-  font-family: Jazz LET, fantasy;
-  color: #ffd9de;
+  font-family: "Noto Sans", sans-serif;
+  color: #ffffff;
   text-align: center;
   font-size: 25px;
 }

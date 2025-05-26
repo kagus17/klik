@@ -27,23 +27,6 @@
 
   <div id="status"></div>
 
-  <script>
-    const status = document.getElementById('status');
-
-    document.getElementById('recovery-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const res = await fetch('/auth/forgot-password', {
-        method: 'POST',
-        body: new URLSearchParams(formData)
-      });
-
-      if (res.ok) {
-        status.innerText = 'Jeśli podany e-mail istnieje, wysłaliśmy instrukcje resetowania hasła.';
-      } else {
-        status.innerText = 'Błąd podczas wysyłania instrukcji resetowania hasła.';
-      }
-    });
-  </script>
+  <script src="recovery.js"></script>
 </body>
 </html>
