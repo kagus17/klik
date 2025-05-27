@@ -146,8 +146,4 @@ router.post('/reset-password', async (req, res) => {
   res.json({ success: true, message: 'Hasło zostało zresetowane.' });
 });
 
-router.get('/csrf-token', (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
-});
-
 module.exports = router;
