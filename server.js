@@ -10,11 +10,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const dbConfig = require('./dbConfig'); // Upewnij się, że masz poprawny plik konfiguracyjny
+const dbConfig = require('./db'); // Upewnij się, że masz poprawny plik konfiguracyjny
 const MySQLStore = require('express-mysql-session')(session);
 
-
-const sessionStore = new MySQLStore(dbConfig);
+const sessionStore = new MySQLStore({}, dbConfig);
 
 const sessionMiddleware = session({
   secret: 'tajny-klucz',
