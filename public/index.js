@@ -68,6 +68,7 @@ const status = document.getElementById('status');
       const res = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'CSRF-Token': csrfToken },
+        credentials: 'same-origin',
         body: new URLSearchParams(formData)
       });
 
