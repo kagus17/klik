@@ -6,6 +6,16 @@ const { Server } = require('socket.io');
 const path = require('path');
 const csurf = require('csurf');
 
+function toMySQLDateTime(dateString) {
+  const date = new Date(dateString);
+  return date.getFullYear() + '-' +
+    String(date.getMonth() + 1).padStart(2, '0') + '-' +
+    String(date.getDate()).padStart(2, '0') + ' ' +
+    String(date.getHours()).padStart(2, '0') + ':' +
+    String(date.getMinutes()).padStart(2, '0') + ':' +
+    String(date.getSeconds()).padStart(2, '0');
+}
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -299,7 +309,7 @@ app.post('/game/save-result', async (req, res) => {
         const roomId = room[0].id;
         await db.query(
             'INSERT INTO results (player_name, room_id, flips, time_played, matches, difficulty, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [playerName, roomId, flips, timePlayed, matches, difficulty, startTime, endTime]
+            [playerName, roomId, flips, timePlayed, matches, difficulty, toMySQLDateTime(startTime),toMySQLDateTime(endTime)]
         );
 
         res.json({ success: true });
