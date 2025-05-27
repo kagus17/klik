@@ -1,5 +1,5 @@
-let csrfToken = '';
 
+    let csrfToken = '';
 (async () => {
   const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
   const data = await res.json();
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('history-container').style.display = 'none';
 
   // Obsługa przycisku "Historia gier"
-  document.getElementById('historii').addEventListener('click', () => {
+  document.getElementById('show-history').addEventListener('click', () => {
     document.getElementById('history-overlay').style.display = 'block';
     document.getElementById('history-container').style.display = 'block';
     // Jeśli chcesz ukryć ostatnią grę:
@@ -198,7 +198,7 @@ document.getElementById('show-history').addEventListener('click', async () => {
   document.getElementById('no-history').style.display = 'none';
   document.getElementById('history-table').style.display = '';
 
-  data.results.forEach(row => {
+data.results.forEach(row => {
     const points = row.matches * (100 - row.time_played);
     const opponent = row.opponent_name || 'Brak';
 
@@ -238,16 +238,7 @@ if (!row.opponent_name) {
   });
 });
 
-document.getElementById('historii').addEventListener('click', async () => {
-  document.querySelector('.last-game').style.display = 'none';
-  document.getElementById('history-container').style.display = 'block';
-  document.getElementById('history-overlay').style.display = 'block';
-
-  // ...jeśli chcesz ładować historię AJAXem, zostaw resztę kodu...
-});
-
 document.getElementById('back-to-last').addEventListener('click', () => {
   document.getElementById('history-container').style.display = 'none';
   document.querySelector('.last-game').style.display = '';
 });
-

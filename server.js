@@ -10,13 +10,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+const dbConfig = require('./dbConfig'); // Upewnij się, że masz poprawny plik konfiguracyjny
 const MySQLStore = require('express-mysql-session')(session);
-const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'gra1v1NEW'
-};
+
 
 const sessionStore = new MySQLStore(dbConfig);
 
