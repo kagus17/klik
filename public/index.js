@@ -15,6 +15,8 @@ const status = document.getElementById('status');
       e.preventDefault();
       const formData = new FormData(e.target);
       try{
+        const csrfRes = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
+        const { csrfToken } = await csrfRes.json();
       const res = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'CSRF-Token': csrfToken },
