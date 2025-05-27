@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function init() {
 const status = document.getElementById('status');
-    const csrfRes = await fetch('/auth/csrf-token');
+    const csrfRes = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
     const { csrfToken } = await csrfRes.json();
 
     // Obsługa logowania
@@ -15,6 +15,8 @@ const status = document.getElementById('status');
       e.preventDefault();
       const formData = new FormData(e.target);
       try{
+        const csrfRes = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
+        const { csrfToken } = await csrfRes.json();
       const res = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'CSRF-Token': csrfToken },
@@ -65,9 +67,14 @@ const status = document.getElementById('status');
         return;
       }
       try{
+        // Pobierz świeży token CSRF
+    const csrfRes = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
+    const { csrfToken } = await csrfRes.json();
+
       const res = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'CSRF-Token': csrfToken },
+        credentials: 'same-origin',
         body: new URLSearchParams(formData)
       });
 
