@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function init() {
 const status = document.getElementById('status');
-    const csrfRes = await fetch('/auth/csrf-token');
+    const csrfRes = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
     const { csrfToken } = await csrfRes.json();
 
     // Obsługa logowania
