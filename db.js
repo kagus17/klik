@@ -1,11 +1,3 @@
-/*const mysql = require('mysql2');
-
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'gra1v1'
-});*/
 
 const fs = require('fs');
 const path = require('path');

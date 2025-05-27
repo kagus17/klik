@@ -148,10 +148,10 @@ function ready() {
 
     // Konfiguracja poziomów
     const cardImages = [
-        'klawiatura.png', 'kamera.png', 'router.png',
-        'drukarka.png', 'napedoptyczny.png', 'monitor.png',
-        'myszka.png', 'projektor.png', 'laptop.png', 'pendrive.png',
-        'glosnik.png', 'mikrofon.png'
+        'brew.png', 'placz.png', 'radosc.png',
+        'sen.png', 'serca.png', 'smutek.png',
+        'szok.png', 'usmiech.png', 'wesoly.png', 'zdziwienie.png',
+        'zlosc.png', 'zazenowanie.png'
     ];
     const cardPairsCount = {
         easy: 3,
@@ -173,17 +173,11 @@ function ready() {
         const cardHTML = `
         <div class="card">
             <div class="card-back card-face">
-                <img class="cob-web cob-web-top-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-top-right" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-right" src="Assets/Images/wisienka.png">
-                <img class="w" src="Assets/Images/w.png">
+               
+                <img class="tyl" src="Assets/Images/tyl.png">
             </div>
             <div class="card-front card-face">
-                <img class="cob-web cob-web-top-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-top-right" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-left" src="Assets/Images/wisienka.png">
-                <img class="cob-web cob-web-bottom-right" src="Assets/Images/wisienka.png">
+
                 <img class="card-value" src="Assets/Images/${image}">
             </div>
         </div>

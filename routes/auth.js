@@ -4,9 +4,43 @@ const db = require('../db');
 const router = express.Router();
 require('dotenv').config();
 
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minut
+  max: 10, // max 10 prób na 15 minut
+  message: { error: 'Za dużo prób logowania. Spróbuj ponownie później.' }
+});
+
+const resetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Za dużo prób resetu hasła. Spróbuj ponownie później.' }
+});
+
+function validateUsername(username) {
+  return typeof username === 'string' && /^[a-zA-Z0-9_]{3,20}$/.test(username);
+}
+function validateEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+function validatePassword(password) {
+  return typeof password === 'string' && /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
+}
+
 // Rejestracja
 router.post('/register', async (req, res) => {
   const { username, password, email } = req.body;
+
+  if (!validateUsername(username)) {
+    return res.status(400).json({ error: 'Nieprawidłowa nazwa użytkownika.' });
+  }
+  if (!validateEmail(email)) {
+    return res.status(400).json({ error: 'Nieprawidłowy email.' });
+  }
+  if (!validatePassword(password)) {
+    return res.status(400).json({ error: 'Hasło nie spełnia wymagań bezpieczeństwa.' });
+  }
 
   // Sprawdź, czy wszystkie dane są podane
   if (!username || !password || !email) {
@@ -28,13 +62,16 @@ router.post('/register', async (req, res) => {
 });
 
 // Logowanie
-router.post('/login', async (req, res) => {
+router.post('/login',loginLimiter, async (req, res) => {
   const { username, password } = req.body;
+  if (!validateUsername(username) || !validatePassword(password)) {
+    return res.status(400).json({ error: 'Nieprawidłowe dane logowania.' });
+  }
   const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
-  if (rows.length === 0) return res.status(401).json({ success: false });
+  if (rows.length === 0) return res.status(401).json({ error: 'Nieprawidłowy login lub hasło.' });
 
   const match = await bcrypt.compare(password, rows[0].password);
-  if (!match) return res.status(401).json({ success: false });
+  if (!match) return res.status(401).json({ error: 'Nieprawidłowy login lub hasło.' });
 
   req.session.user = { id: rows[0].id, username };
   res.json({ success: true });
@@ -44,7 +81,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 // Endpoint do generowania tokenu resetu hasła
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', resetLimiter, async (req, res) => {
   const { email } = req.body;
 
   // Sprawdź, czy e-mail istnieje w bazie
@@ -90,6 +127,9 @@ router.post('/forgot-password', async (req, res) => {
 
 router.post('/reset-password', async (req, res) => {
   const { token, newPassword } = req.body;
+   if (!validatePassword(newPassword)) {
+    return res.status(400).json({ error: 'Hasło nie spełnia wymagań bezpieczeństwa.' });
+  }
 
   // Sprawdź, czy token istnieje i czy nie wygasł
   const [user] = await db.query('SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > ?', [token, new Date()]);
@@ -104,6 +144,10 @@ router.post('/reset-password', async (req, res) => {
   await db.query('UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?', [hash, user[0].id]);
 
   res.json({ success: true, message: 'Hasło zostało zresetowane.' });
+});
+
+router.get('/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
 });
 
 module.exports = router;

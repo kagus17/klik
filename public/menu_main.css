@@ -6,7 +6,7 @@
 
 body {
   display: flex;
-  min-height: 100vh;
+  min-height: 98vh;
   padding: 0 25%;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
   background-position: center;
@@ -98,7 +98,7 @@ h1 {
 }
 
 .leaderboard {
-  height: 700px;
+  height: 450px;
   width: 500px;
   background: transparent;
   background-color: rgba(83, 25, 175, 0.952);
@@ -107,6 +107,34 @@ h1 {
   color: white;
   border-radius: 10px;
   padding: 30px 40px;
+}
+
+.last-game {
+  height: 200px;
+  width: 500px;
+  background: transparent;
+  background-color: rgba(83, 25, 175, 0.952);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 10px black;
+  color: white;
+  border-radius: 10px;
+  padding: 30px 40px;
+}
+
+.box2 {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+
+#history-container {
+  color: white ;
+  margin-top:20px;
+}
+
+#no-history {
+  display: none;
 }
 
 .input-space {
@@ -168,6 +196,8 @@ h1 {
     }
 
     #difficulty button {
+      display: flex;
+      align-items: center;
   width: 70%;
   height: 45px;
   background: white;
@@ -263,4 +293,97 @@ h1 {
 /* button click effect*/
 .Btn:active {
   transform: translate(2px, 2px);
+}
+
+.btn-menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  gap: 10px;
+  top: 20px;
+  right: 30px;
+  z-index: 1000;
+}
+
+/* Przyciemnienie tła dla historii */
+#history-overlay {
+  display: none;
+  position: fixed;
+  z-index: 999; /* overlay niżej */
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+}
+
+#history-container {
+  position: fixed;
+  z-index: 1001; /* tablica historii wyżej niż overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(40, 40, 80, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 0 40px #000a;
+  padding: 32px 24px;
+  width: 650px;
+  height: 700px;
+  overflow: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#leaderboard {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  border-radius: 16px;
+  padding: 32px 24px;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+.back{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 1920px) {
+  .create_room,
+  .join_room {
+    height: 300px;
+    width: 100%;
+    padding: 20px 20px;
+  }
+  .leaderboard {
+    height: 400px;
+    width: 350px;
+    padding: 20px 20px;
+  }
+  .last-game {
+    height: 200px;
+    width: 350px;
+    padding: 20px 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container, .box1, .create_room {
+    height: 300px;
+    width: 100%;
+    padding: 20px;
+  }
+  .join_room {
+    height: 300px;
+    width: 100%;
+    padding: 20px;
+  }
+  .leaderboard {
+    height: 500px;
+    width: 100%;
+    padding: 20px;
+  }
 }

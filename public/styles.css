@@ -1,44 +1,49 @@
 * {
   box-sizing: border-box;
+  font-family: "Noto Sans", sans-serif;
+  font-weight: bold;
 }
 
 html {
   min-height: 100vh;
-  cursor: url(Assets/Cursors/kursor.png), auto;
-  font-family: Jazz LET, fantasy;
 }
 
 body {
   margin: 0;
-  background: radial-gradient(#ffd9de, #3c0001);
-}
-
-.page-title {
-  color: #3c0001;
-  font-family: Jazz LET, fantasy;
-  font-weight: normal;
-  text-align: center;
-  font-size: 6em;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
+  background-position: center;
+  background-size: cover;
+  background-color: black;
 }
 
 .game-info-container {
   grid-column: 1 / -1;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 50px;
+  align-items: center;
 }
 
 .game-info {
-  color: #3c0001;
+  color: #ffffff;
   font-size: 2em;
 }
 
-.game-container {
+.game-container-data {
   margin: 50px auto;
   display: grid;
-  grid-template-columns: repeat(4, auto);
   grid-gap: 10px;
   justify-content: center;
-  perspective: 500px;
+  justify-items: center;
+}
+
+#game-container {
+  justify-content: center;
+}
+
+#difficulty-display {
+  font-size: 2em;
+  color: #ffffff;
 }
 
 .card {
@@ -75,8 +80,7 @@ body {
 }
 
 .card-back {
-  background-color: rgb(255, 217, 222);
-  border-color: #3c0001;
+  background-color: rgba(83, 25, 175, 0.952);
   transform: rotateY(0); 
 }
 
@@ -134,8 +138,7 @@ body {
 }
 
 .card-front {
-  background-color: #ffd9de;
-  border-color: #3c0001;
+  background-color: #955f46;
   transform: rotateY(180deg);
 }
 
@@ -151,18 +154,41 @@ body {
   align-items: center;
   flex-direction: column;
   color: #ffd9de;
-  font-family: Jazz LET, fantasy;
   transition: background-color 500ms, font-size 500ms;
-}
-
-.overlay-text-small {
-  font-size: .3em;
 }
 
 .overlay-text.visible {
   display: flex;
-  animation: overlay-grow 100ms forwards;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30,30,30,0.95);
+  text-align: center;
+  color: #fff;
 }
+
+#copy-room-code {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+#notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #333;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
+  font-size: 1.1em;
+  z-index: 1000;
+  display: none;
+}
+
 
 @keyframes dance {
   0%, 100% {
@@ -208,9 +234,10 @@ body {
   }
 }
 
-footer {
-  font-family: Jazz LET, fantasy;
-  color: #ffd9de;
-  text-align: center;
-  font-size: 25px;
+@media (max-width: 1920px) {
+
+  .card {
+    width: 100px;
+    height: 140px;
+  }
 }

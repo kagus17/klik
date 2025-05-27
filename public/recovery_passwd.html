@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="recovery_main.css">
   <title>KLIK | Odzyskaj hasło</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
   
   <div class="background">
-    <div class ="go-back"><a href="index.html">&larr;</a></div>
+    <div class ="go-back"><a href="index.html"><span class="material-symbols-outlined">keyboard_arrow_left</span></a></div>
     <div class="logo-container">
         <img src="logo.png" alt="Logo" class="logo-img">
     </div>
@@ -26,23 +27,6 @@
 
   <div id="status"></div>
 
-  <script>
-    const status = document.getElementById('status');
-
-    document.getElementById('recovery-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const res = await fetch('/auth/forgot-password', {
-        method: 'POST',
-        body: new URLSearchParams(formData)
-      });
-
-      if (res.ok) {
-        status.innerText = 'Jeśli podany e-mail istnieje, wysłaliśmy instrukcje resetowania hasła.';
-      } else {
-        status.innerText = 'Błąd podczas wysyłania instrukcji resetowania hasła.';
-      }
-    });
-  </script>
+  <script src="recovery.js"></script>
 </body>
 </html>
