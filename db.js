@@ -1,8 +1,4 @@
-const mysql = require('mysql2');
-const dbConfig = require('./dbConfig');
 
-const pool = mysql.createPool(dbConfig);
-/*
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2');
@@ -17,7 +13,7 @@ const pool = mysql.createPool({
   ssl: {
     ca: fs.readFileSync(path.join(__dirname, 'certs', 'DigiCertGlobalRootCA.crt.pem'))
   }
-});*/
+});
 
 module.exports = pool.promise();
 
