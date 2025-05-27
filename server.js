@@ -12,9 +12,19 @@ const io = new Server(server);
 
 const dbConfig = require('./dbConfig'); // Upewnij się, że masz poprawny plik konfiguracyjny
 const MySQLStore = require('express-mysql-session')(session);
+const fs = require('fs');
+require('dotenv').config(); // wczytuje plik .env
 
-
-const sessionStore = new MySQLStore(dbConfig);
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: 3306,
+  ssl: {
+    ca: fs.readFileSync(path.join(__dirname, 'certs', 'DigiCertGlobalRootCA.crt.pem'))
+  }
+});
 
 const sessionMiddleware = session({
   secret: 'tajny-klucz',
