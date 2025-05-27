@@ -10,10 +10,18 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const dbConfig = require('./db'); // Upewnij się, że masz poprawny plik konfiguracyjny
 const MySQLStore = require('express-mysql-session')(session);
+const pool = require('./db');
 
-const sessionStore = new MySQLStore({}, dbConfig);
+const sessionStore = new MySQLStore({
+  createDatabaseTable: false
+}, pool, (err) => {
+  if (err) {
+    console.error('Błąd inicjalizacji MySQLStore:', err);
+  } else {
+    console.log('MySQLStore zainicjalizowany pomyślnie');
+  }
+});
 
 const sessionMiddleware = session({
   secret: 'tajny-klucz',
@@ -279,6 +287,7 @@ app.get('/session/check', (req, res) => {
   });
 
 const db = require('./db');
+const { create } = require('domain');
 
 app.post('/game/save-result', async (req, res) => {
     const { playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime } = req.body;

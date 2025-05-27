@@ -146,5 +146,4 @@ router.post('/reset-password', async (req, res) => {
   res.json({ success: true, message: 'Hasło zostało zresetowane.' });
 });
 
-
 module.exports = router;

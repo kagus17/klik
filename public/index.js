@@ -70,7 +70,6 @@ const status = document.getElementById('status');
         // Pobierz świeży token CSRF
     const csrfRes = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
     const { csrfToken } = await csrfRes.json();
-
       const res = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'CSRF-Token': csrfToken },
