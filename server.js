@@ -34,6 +34,10 @@ app.use(sessionMiddleware);
 
 app.use(csurf());
 
+app.get('/auth/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
     return res.status(403).json({ error: 'Błąd CSRF. Odśwież stronę.' });
