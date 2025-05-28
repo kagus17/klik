@@ -6,8 +6,7 @@
 
 body {
   display: flex;
-  min-height: 98vh;
-  padding: 0 25%;
+  min-height: 100vh;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 1));
   background-position: center;
   background-size: cover;
@@ -16,11 +15,12 @@ body {
   flex-wrap: wrap;
   align-content: center;
   justify-content: space-around;
+  overflow-x: hidden;
 }
 
 h3 {
   display: flex;
-  font-size: 20px;
+  font-size: 35px;
   color: white;
   justify-content: center;
 }
@@ -107,6 +107,10 @@ h1 {
   color: white;
   border-radius: 10px;
   padding: 30px 40px;
+}
+
+th {
+  gap: 10px;
 }
 
 .last-game {
@@ -297,14 +301,24 @@ h1 {
 
 .btn-menu {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
   position: absolute;
-  gap: 10px;
   top: 20px;
   right: 30px;
   z-index: 1000;
+}
+
+.logout-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.history-btn {
+  position: absolute;
+  top: 70px;
+  right: 10px;
 }
 
 /* Przyciemnienie tła dla historii */
@@ -335,14 +349,47 @@ h1 {
 }
 
 #leaderboard {
+  width: 100%;
   display: flex;
   justify-content: center;
-  justify-items: center;
-  align-items: center;
-  border-radius: 16px;
-  padding: 32px 24px;
+  align-items: flex-start;
+  padding: 0;
+  background: none;
+  box-shadow: none;
   flex-wrap: wrap;
-  flex-direction: column;
+}
+
+#leaderboard table {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+#leaderboard th, #leaderboard td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 12px 24px;
+  font-size: 18px;
+  min-width: 100px;
+}
+
+#leaderboard th {
+  font-weight: bold;
+  color: #fff;
+  background: rgba(83, 25, 175, 0.7);
+  border-bottom: 2px solid #fff2;
+}
+
+#leaderboard tr:nth-child(even) td {
+  background: rgba(255,255,255,0.04);
+}
+
+#no-last-game {
+  display: flex;
+  padding: 20px 125px;
 }
 
 .back{
