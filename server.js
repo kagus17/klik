@@ -39,7 +39,18 @@ const pool = require('./db');
  * Konfiguracja przechowywania sesji w MySQL.
  */
 const sessionStore = new MySQLStore({
-  createDatabaseTable: false
+  createDatabaseTable: true, // Automatyczne tworzenie tabeli sesji
+  schema: {
+    tableName: 'sessions',
+    columnNames: {
+      session_id: 'session_id',
+      expires: 'expires',
+      data: 'data'
+    }
+  },
+  expiration: 24 * 60 * 60 * 1000, // Sesje wygasają po 24 godzinach
+  clearExpired: true, // Automatyczne usuwanie wygasłych sesji
+  checkExpirationInterval: 15 * 60 * 1000 // Sprawdzanie co 15 minut
 }, pool, (err) => {
   if (err) {
     console.error('Błąd inicjalizacji MySQLStore:', err);
@@ -59,7 +70,8 @@ const sessionMiddleware = session({
   cookie: {
     httpOnly: true,
     secure: true, // ustaw na true jeśli masz HTTPS
-    sameSite: 'lax'
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // Czas ważności ciasteczka (24 godziny)
   }
 });
 
