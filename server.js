@@ -24,7 +24,9 @@ const MySQLStore = require('express-mysql-session')(session);
 const pool = require('./db');
 
 const sessionStore = new MySQLStore({
-  createDatabaseTable: false
+  createDatabaseTable: false,
+  clearExpired: true,
+  checkExpirationInterval: 900000 // co 15 minut (w milisekundach)
 }, pool, (err) => {
   if (err) {
     console.error('Błąd inicjalizacji MySQLStore:', err);
@@ -41,7 +43,8 @@ const sessionMiddleware = session({
   cookie: {
     httpOnly: true,
     secure: true, // ustaw na true jeśli masz HTTPS
-    sameSite: 'lax'
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 // np. 1 godzina
   }
 });
 
