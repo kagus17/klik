@@ -1,3 +1,10 @@
+/**
+ * @file server.js
+ * @description Główny plik uruchamiający serwer aplikacji multiplayerowej (gra 1v1 online).
+ * @author [KL MF DA ŁW]
+ * @date [28.05.2025]
+ */
+
 const express = require('express');
 const session = require('express-session');
 const sharedSession = require('socket.io-express-session');
@@ -6,6 +13,11 @@ const { Server } = require('socket.io');
 const path = require('path');
 const csurf = require('csurf');
 
+/**
+ * Konwertuje datę w formacie string na format MySQL DATETIME.
+ * @param {string} dateString - Data w formacie ISO.
+ * @returns {string} Data w formacie 'YYYY-MM-DD HH:MM:SS'
+ */
 function toMySQLDateTime(dateString) {
   const date = new Date(dateString);
   return date.getFullYear() + '-' +
@@ -23,10 +35,11 @@ const io = new Server(server);
 const MySQLStore = require('express-mysql-session')(session);
 const pool = require('./db');
 
+/**
+ * Konfiguracja przechowywania sesji w MySQL.
+ */
 const sessionStore = new MySQLStore({
-  createDatabaseTable: false,
-  clearExpired: true,
-  checkExpirationInterval: 900000 // co 15 minut (w milisekundach)
+  createDatabaseTable: false
 }, pool, (err) => {
   if (err) {
     console.error('Błąd inicjalizacji MySQLStore:', err);
@@ -35,6 +48,9 @@ const sessionStore = new MySQLStore({
   }
 });
 
+/**
+ * Middleware obsługujący sesje użytkowników.
+ */
 const sessionMiddleware = session({
   secret: 'tajny-klucz',
   resave: false,
@@ -50,15 +66,19 @@ const sessionMiddleware = session({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(sessionMiddleware);
-
 app.use(csurf());
 
+/**
+ * Endpoint do pobrania tokena CSRF.
+ */
 app.get('/auth/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
+/**
+ * Middleware obsługujący błędy CSRF.
+ */
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
     return res.status(403).json({ error: 'Błąd CSRF. Odśwież stronę.' });
@@ -66,25 +86,12 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// Udostępnij sesję w Socket.IO
+/**
+ * Udostępnienie sesji dla połączeń Socket.IO.
+ */
 io.use(sharedSession(sessionMiddleware, {
   autoSave: true
 }));
-
-/*app.use(session({
-  secret: 'tajny-klucz',
-  resave: false,
-  saveUninitialized: false
-}));
-
-app.use((req, res, next) => {
-  if (req.session.user) {
-    console.log(`Zalogowany użytkownik: ${req.session.user.username}`);
-  } else {
-    console.log('Brak zalogowanego użytkownika');
-  }
-  next();
-});*/
 
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self';");
@@ -93,14 +100,21 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Routing
 app.use('/auth', require('./routes/auth'));
 app.use('/room', require('./routes/room'));
 const leaderboardRoutes = require('./routes/leaderboard');
 app.use(leaderboardRoutes);
 
-// Socket.IO logika
-const rooms = {}; // Przechowuje listy socket.id dla każdego pokoju
+/**
+ * Obiekt przechowujący dane o pokojach gier.
+ * @type {Object<string, {players: Array, difficulty: string, timeRemaining: number, kicked: Array, allowed?: Array, interval?: NodeJS.Timeout, winner?: string}>}
+ */
+const rooms = {};
 
+/**
+ * Inicjalizacja połączenia Socket.IO.
+ */
 io.on('connection', (socket) => {
   const user = socket.handshake.session.user;
   if (!user) {
@@ -285,12 +299,18 @@ if (room.kicked && room.kicked.includes(username)) {
   });
 });
 
+/**
+ * Endpoint testowy serwera.
+ */
 app.get('/', (req, res) => {
   res.send('Serwer działa!');
 });
 
 server.listen(8080, () => console.log('Serwer + Socket.IO działa na http://localhost:8080'));
 
+/**
+ * Sprawdzenie aktualnej sesji użytkownika.
+ */
 app.get('/session/check', (req, res) => {
     if (req.session.user) {
       res.json({ loggedIn: true, username: req.session.user.username });
@@ -302,6 +322,9 @@ app.get('/session/check', (req, res) => {
 const db = require('./db');
 const { create } = require('domain');
 
+/**
+ * Zapis wyniku gry do bazy danych.
+ */
 app.post('/game/save-result', async (req, res) => {
     const { playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime } = req.body;
 
@@ -322,6 +345,9 @@ app.post('/game/save-result', async (req, res) => {
     }
 });
 
+/**
+ * Pobranie ostatniego wyniku użytkownika wraz z wynikiem przeciwnika.
+ */
 app.get('/game/last-result', async (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
 
@@ -353,6 +379,9 @@ app.get('/game/last-result', async (req, res) => {
     }
 });
 
+/**
+ * Pobranie historii gier użytkownika.
+ */
 app.get('/game/history', async (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
 
@@ -377,6 +406,9 @@ app.get('/game/history', async (req, res) => {
     }
 });
 
+/**
+ * Wylogowanie użytkownika i usunięcie sesji.
+ */
   app.post('/auth/logout', (req, res) => {
     req.session.destroy(() => {
       res.json({ success: true });
