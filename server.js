@@ -58,8 +58,8 @@ const sessionMiddleware = session({
   store: sessionStore, // <-- dodaj to
   cookie: {
     httpOnly: true,
-    secure: true, // ustaw na true jeśli masz HTTPS
-    sameSite: 'lax',
+    secure: false, // ustaw na true jeśli masz HTTPS
+    sameSite: 'lax'
   }
 });
 
