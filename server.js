@@ -70,8 +70,7 @@ const sessionMiddleware = session({
   cookie: {
     httpOnly: true,
     secure: true, // ustaw na true jeśli masz HTTPS
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // Czas ważności ciasteczka (24 godziny)
+    sameSite: 'lax'
   }
 });
 
