@@ -60,7 +60,6 @@ const sessionMiddleware = session({
     httpOnly: true,
     secure: true, // ustaw na true jeśli masz HTTPS
     sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 // np. 1 godzina
   }
 });
 
