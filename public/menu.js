@@ -1,5 +1,4 @@
-
-    let csrfToken = '';
+let csrfToken = '';
 (async () => {
   const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
   const data = await res.json();
@@ -33,9 +32,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     const data = await res.json();
     const tbody = document.querySelector('#leaderboard tbody');
     tbody.innerHTML = '';
+
+    const difficultyMap = {
+      easy: 'Łatwy',
+      medium: 'Średni',
+      hard: 'Trudny'
+    };
+
     data.forEach(row => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${row.player}</td><td>${row.points}</td>`;
+      const difficultyPL = difficultyMap[row.difficulty] || row.difficulty;
+      tr.innerHTML = `<td>${row.player}</td><td>${difficultyPL}</td><td>${row.points}</td>`;
       tbody.appendChild(tr);
     });
   } catch (e) {
@@ -179,7 +186,6 @@ function calculatePoints(matches, time_played) {
 })();
 
 document.getElementById('show-history').addEventListener('click', async () => {
-  document.querySelector('.last-game').style.display = 'none';
   const historyDiv = document.getElementById('history-container');
   historyDiv.style.display = '';
 
@@ -222,12 +228,16 @@ if (!row.opponent_name) {
 } else {
   result = 'Przegrana';
 }
-
+  const difficultyMap = {
+      easy: 'Łatwy',
+      medium: 'Średni',
+      hard: 'Trudny'
+    };
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${new Date(row.end_time).toLocaleString()}</td>
       <td>${opponent}</td>
-      <td>${row.difficulty}</td>
+      <td>${difficultyMap[row.difficulty]}</td>
       <td>${row.matches}</td>
       <td>${row.flips}</td>
       <td>${row.time_played}</td>
