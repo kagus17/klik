@@ -1,8 +1,12 @@
 let csrfToken = '';
 (async () => {
-    const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
-    const data = await res.json();
-    csrfToken = data.csrfToken;
+    try {
+        const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
+        const data = await res.json();
+        csrfToken = data.csrfToken;
+    } catch (error) {
+        console.error('Błąd podczas pobierania globalnego tokenu CSRF:', error);
+    }
 })();
 
 class AudioController {
@@ -361,7 +365,7 @@ function calculateScore(timePlayed, matches) {
     return matches * 100 - timePlayed * 2; // Każde dopasowanie daje 100 punktów, czas odejmuje 2 punkty za sekundę
 }
 
-function ready() {
+async function ready() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomCode = urlParams.get('code');
     const difficulty = urlParams.get('difficulty'); // Pobierz poziom trudności z URL
@@ -373,14 +377,28 @@ function ready() {
     
     if (roomCode) {
         let loggedInUsername = 'Gracz'; // Domyślna wartość
-
-        fetch('/session/check')
-            .then(res => res.json())
-            .then(data => {
-            if (data.loggedIn) {
-                loggedInUsername = data.username;
+        
+     try {
+            // Użyj istniejącego globalnego csrfToken lub pobierz go, jeśli jest to konieczne, ale generalnie wystarczy globalny
+            // Upewnij się, że globalny csrfToken został pobrany przed wykonaniem tego bloku
+            
+            const sessionCheckRes = await fetch('/session/check', {
+                method: 'GET', // Zmieniono na GET, aby pasowało do serwera
+                headers: {
+                    // Content-Type nie jest potrzebny dla GET bez body
+                    'CSRF-Token': csrfToken // Użyj globalnego csrfToken
+                },
+                credentials: 'same-origin'
+                // Usunięto body, ponieważ GET nie powinno mieć body
+            });
+            const sessionData = await sessionCheckRes.json();
+            console.log('Użytkownik jest zalogowany:', sessionData.loggedIn);
+            if (sessionData.loggedIn) {
+                loggedInUsername = sessionData.username;
             }
-        });
+        } catch (error) {
+            console.error('Błąd podczas sprawdzania sesji użytkownika:', error);
+        }
 
         const difficultyNamesPL = {
             easy: 'Łatwy',
