@@ -5,7 +5,7 @@ const db = require('../db');
 router.get('/leaderboard', async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT player_name AS player, difficulty, (matches * 100 - time_played * 2) AS points
+      `SELECT player_name AS player, difficulty, (matches * (100 - time_played)) AS points
        FROM results
        ORDER BY points DESC
        LIMIT 10`
