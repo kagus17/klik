@@ -1,6 +1,8 @@
 <!DOCTYPE html>
+<!-- Strona gry wieloosobowej, wyświetlająca pokój, wyniki i planszę gry. -->
 <html lang="en">
 <head>
+   <!-- Metadane i zasoby strony -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -10,20 +12,23 @@
   <title>KLIK | Gra 1 vs 1</title>
 </head>
 <body onselectstart="return false;">
+  <!-- Overlay oczekiwania na przeciwnika -->
   <div class="overlay-text visible" id="waiting-overlay">
     <div id="room-code-display" style="cursor:pointer" title="Kliknij, aby skopiować kod">Kod pokoju: Ładowanie...</div>
     <div id="waiting-message">Oczekiwanie na przeciwnika...</div>
   </div>
+   <!-- Modal końca gry -->
   <div id="game-over-text" class="overlay-text">
     Koniec gry
     <span class="overlay-text-small">Naciśnij aby ponownie rozpocząć gre</span>
   </div>
+      <!-- Modal zwycięstwa -->
   <div id="victory-text" class="overlay-text">
     Zwycięstwo
     <span class="overlay-text-small">Naciśnij aby ponownie rozpocząć gre</span>
   </div>
 
-  <!-- Results Modal -->
+  <!-- Modal wyników gry -->
   <div id="results-modal" class="overlay-text hidden">
     <h2 id="results-title">Wyniki</h2>
     <p id="results-flips"></p>
@@ -33,23 +38,28 @@
   </div>
 
   <div class="game-container-data">
+      <!-- Informacje o grze -->
     <div class="game-info">
+      <!-- Poziom trudności -->
       <span id="difficulty-display">Poziom trudności: Ładowanie...</span>
     </div>
     <div class="game-info-container">
         <div class="game-info">
+           <!-- Pozostały czas -->
             Czas <span id="time-remaining">100 </span>
         </div>
         <div class="game-info">
+           <!-- Liczba odwróceń gracza -->
             Twoje odwrócenia <span id="flips">0 </span>
         </div>
+         <!-- Liczba odwróceń przeciwnika -->
         <div class="game-info" id="opponent-info" style="display: none;">
           Odwrócenia <span id="opponent-name">Przeciwnika</span>:<span id="opponent-flips">0 </span>
         </div>
     </div>
   </div>
 
-    <!-- Dynamic Card Container -->
+    <!-- Kontener planszy gry -->
     <div id="game-container"></div>
       <!-- Karty będą generowane dynamicznie przez JavaScript -->
     </div>

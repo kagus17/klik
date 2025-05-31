@@ -1,6 +1,8 @@
 <!DOCTYPE html>
+<!-- Strona odzyskiwania hasła, umożliwiająca użytkownikowi żądanie instrukcji resetowania hasła. -->
 <html lang="pl">
 <head>
+  <!-- Metadane i zasoby strony -->
   <meta charset="UTF-8">
   <link rel="stylesheet" href="recovery_main.css">
   <title>KLIK | Odzyskaj hasło</title>
@@ -9,22 +11,27 @@
 <body>
   
   <div class="background">
+    <!-- Przycisk powrotu do strony logowania -->
     <div class ="go-back"><a href="index.html"><span class="material-symbols-outlined">keyboard_arrow_left</span></a></div>
     <div class="logo-container">
         <img src="logo.png" alt="Logo" class="logo-img">
     </div>
-    
+    <!-- Sekcja formularza odzyskiwania hasła -->
     <h1>Odzyskaj hasło</h1>
+    <!-- Formularz odzyskiwania hasła -->
     <form id="recovery-form">
         <div class="recover-info">
             Jeśli towje konto istnieje, prześlemy tobie instrukcje resetowania hasła.
           </div>
+          <!-- Pole wprowadzania adresu e-mail -->
       <div class="input-space">
         <input type="text" name="email" placeholder="Email" required>
       </div>
+      <!-- Przycisk wysyłania formularza -->
       <button type="submit" class="btn">Odzyskaj</button>
     </form>
 
+  <!-- Element wyświetlający status operacji (np. sukces lub błąd) -->
   <div id="status"></div>
 
   <script src="recovery.js"></script>

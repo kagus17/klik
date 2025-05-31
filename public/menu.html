@@ -1,6 +1,8 @@
 <!DOCTYPE html>
+<!-- Strona menu gry, umożliwiająca tworzenie/dołączanie do pokojów, przeglądanie rankingu i historii gier. -->
 <html lang="pl">
 <head>
+   <!-- Metadane i zasoby strony -->
   <meta charset="UTF-8">
   <link rel="stylesheet" href="menu_main.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -10,35 +12,34 @@
 
   <div class ="logo_container">
     <div id="status"></div>
+     <!-- Nagłówek strony -->
       <h1>Stwórz własny pokój lub dołącz do istniejącej gry i osiągnij najlepszy wynik.</h1>
   </div>
 
 
   <div class = "container">
     <div class = "box1">
+      <!-- Sekcja tworzenia gry -->
       <div class="create_room">
         <h3>Stwórz gre</h3>
         <label for="difficulty">Wybierz poziom trudności:</label>
+        <!-- Wybór poziomu trudności -->
         <div class="difficulty-select">
             <div id="difficulty">
-               <!--git <label for="difficulty">Wybierz poziom trudności:</label>
-                <select id="difficulty">
-                <option value="easy">Łatwy</option>
-                <option value="medium" selected>Średni</option>
-                <option value="hard">Trudny</option>
-                </select>
-                </div>-->
               <button id="prev-difficulty"><span class="material-symbols-outlined">keyboard_arrow_left</span></button>
               <option id="difficulty-label" value="medium">Średni (6 par)</option>
               <button id="next-difficulty"><span class="material-symbols-outlined">keyboard_arrow_right</span></button>
             </div>
         </div>
+        <!-- Przycisk tworzenia pokoju -->
         <button id="create-room" class ="btn">Utwórz pokój</button>
       </div>
 
+      <!-- Sekcja dołączania do gry -->
     <div class="join_room">
       <h3>Dołącz do gry</h3>
       <div class = "input-space">
+         <!-- Formularz dołączania do pokoju -->
         <form id="join-form">
           <input type="text" name="code" placeholder="Kod pokoju" required maxlength="6">
         </div>
@@ -48,6 +49,7 @@
   </div>
 
   <div class = "box2">
+    <!-- Sekcja rankingu najlepszych wyników -->
   <div class = "leaderboard">
     <h3>Najlepsze wyniki</h3>
     <table id="leaderboard">
@@ -63,6 +65,7 @@
       </tbody>
     </table>
     </div>
+     <!-- Sekcja ostatniej gry -->
   <div class="last-game">
   <h3>Ostatnia gra</h3>
   <table id="last-game-table">
@@ -88,6 +91,7 @@
   
 <!-- Przyciemnienie tła -->
 <div id="history-overlay"></div>
+<!-- Sekcja historii gier -->
   <div id="history-container">
     <div class="history-info">
   <h3>Historia Twoich gier</h3>
@@ -130,7 +134,7 @@
     <div class="text">Wyloguj</div>
   </button>
 </div>
-
+ <!-- Przyciski nawigacyjne -->
 <div class="history-btn">
   <button class="Btn" id="show-history">
     <div class="sign">
@@ -139,11 +143,12 @@
         <path d="M2.43.265c-.3 0-.548.236-.573.53h-.328a.74.74 0 0 0-.735.734v3.822a.74.74 0 0 0 .735.734H4.82a.74.74 0 0 0 .735-.734V1.529a.74.74 0 0 0-.735-.735h-.328a.58.58 0 0 0-.573-.53zm0 .529h1.49c.032 0 .049.017.049.049v.431c0 .032-.017.049-.049.049H2.43c-.032 0-.05-.017-.05-.049V.843c0-.032.018-.05.05-.05zm-.901.53h.328c.026.292.274.528.573.528h1.49a.58.58 0 0 0 .573-.529h.328a.2.2 0 0 1 .206.206v3.822a.2.2 0 0 1-.206.205H1.53a.2.2 0 0 1-.206-.205V1.529a.2.2 0 0 1 .206-.206z"></path>
       </svg>
     </div>
+    <!-- Przycisk wyświetlania historii gier -->
     <div class="text">Historia gier</div>
   </button>
 </div>
 </div>
-
+<!-- Przycisk wylogowania -->
   <div class="text">Logout</div>
   <script src="menu.js"></script>
 </body>
