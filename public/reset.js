@@ -1,20 +1,65 @@
+    /**
+ * @file reset.js
+ * @description Skrypt obsługujący formularz resetowania hasła, walidujący nowe hasło i wysyłający żądanie do serwera z tokenem resetowania.
+ * @author KL, MF, DA, ŁW
+ * @version 1.0.0
+ * @date 2025-05-31
+ */
+
+/**
+ * @module PasswordReset
+ */
+
+/**
+ * Token resetowania hasła pobrany z parametrów URL.
+ * @type {string|null}
+ */
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
+
+    /**
+ * Element wyświetlający status operacji.
+ * @type {HTMLElement}
+ */
     const status = document.getElementById('status');
 
+    /**
+ * Globalny token CSRF używany do zabezpieczenia żądań HTTP.
+ * @type {string}
+ */
     let csrfToken = '';
+
+    /**
+ * Pobiera token CSRF z serwera przy starcie aplikacji.
+ * @async
+ * @function
+ * @throws {Error} Jeśli nie uda się pobrać tokenu CSRF.
+ */
 (async () => {
   const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
   const data = await res.json();
   csrfToken = data.csrfToken;
 })();
 
+/**
+ * Waliduje hasło pod kątem długości i zawartości.
+ * @function
+ * @param {string} password - Hasło do sprawdzenia.
+ * @returns {boolean} Czy hasło spełnia wymagania (min. 8 znaków, mała i wielka litera, cyfra, znak specjalny).
+ */
      function validatePassword(password) {
       // Minimum 8 znaków, przynajmniej jedna cyfra, mała i wielka litera, znak specjalny
       const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
       return regex.test(password);
     }
 
+    /**
+ * Obsługuje wysyłanie formularza resetowania hasła.
+ * @function
+ * @listens submit
+ * @param {Event} e - Zdarzenie submit formularza.
+ * @description Waliduje nowe hasło i wysyła żądanie resetowania hasła z tokenem.
+ */
     document.getElementById('reset-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
