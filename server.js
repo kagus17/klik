@@ -30,6 +30,33 @@ const { Server } = require('socket.io');
 const path = require('path');
 const csurf = require('csurf');
 
+const rateLimit = require('express-rate-limit');
+
+/**
+ * Globalny rate-limiter dla wszystkich żądań przychodzących.
+ * Ogranicza liczbę żądań do 100 na minutę na adres IP, aby zapobiec przeciążeniu serwera.
+ * @type {import('express-rate-limit').RateLimit}
+ */
+const globalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuta
+  max: 100, // Maksymalnie 100 żądań na IP
+  message: 'Zbyt wiele żądań z tego IP, spróbuj ponownie za minutę.',
+  standardHeaders: true, // Włącza nagłówki RateLimit (np. RateLimit-Remaining)
+  legacyHeaders: false, // Wyłącza stare nagłówki X-RateLimit
+  /**
+   * Funkcja wywoływana przy przekroczeniu limitu.
+   * Loguje informacje o IP, które przekroczyło limit.
+   * @param {import('express').Request} req - Obiekt żądania Express.
+   * @param {import('express').Response} res - Obiekt odpowiedzi Express.
+   */
+  onLimitReached: (req, res) => {
+    console.log(`Limit przekroczony dla IP: ${req.ip}`);
+  }
+});
+
+// Zastosuj globalny limiter dla wszystkich tras
+app.use(globalLimiter);
+
 /**
  * Konwertuje datę w formacie ISO na format MySQL DATETIME.
  * @function toMySQLDateTime

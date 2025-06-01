@@ -47,6 +47,28 @@ const resetLimiter = rateLimit({
 });
 
 /**
+ * Rate-limiter dla endpointu rejestracji (/auth/register).
+ * Ogranicza liczbę prób rejestracji do 5 na 15 minut na IP, aby zapobiec masowemu tworzeniu kont.
+ * @type {import('express-rate-limit').RateLimit}
+ */
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minut
+  max: 5, // Maksymalnie 5 prób rejestracji
+  message: 'Zbyt wiele prób rejestracji, spróbuj ponownie za 15 minut.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  /**
+   * Funkcja wywoływana przy przekroczeniu limitu rejestracji.
+   * Loguje informacje o próbie nadużycia.
+   * @param {import('express').Request} req - Obiekt żądania Express.
+   * @param {import('express').Response} res - Obiekt odpowiedzi Express.
+   */
+  onLimitReached: (req, res) => {
+    console.log(`Limit rejestracji przekroczony dla IP: ${req.ip}`);
+  }
+});
+
+/**
  * Waliduje nazwę użytkownika.
  * @function
  * @param {string} username - Nazwa użytkownika do sprawdzenia.
@@ -83,7 +105,7 @@ function validatePassword(password) {
  * @param {Object} res - Obiekt odpowiedzi Express.
  * @returns {Object} Odpowiedź JSON z informacją o sukcesie lub błędzie.
  */
-router.post('/register', async (req, res) => {
+router.post('/register',registerLimiter, async (req, res) => {
   const { username, password, email } = req.body;
 
   if (!validateUsername(username)) {
