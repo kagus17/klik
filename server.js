@@ -33,31 +33,6 @@ const csurf = require('csurf');
 const rateLimit = require('express-rate-limit');
 
 /**
- * Globalny rate-limiter dla wszystkich żądań przychodzących.
- * Ogranicza liczbę żądań do 100 na minutę na adres IP, aby zapobiec przeciążeniu serwera.
- * @type {import('express-rate-limit').RateLimit}
- */
-const globalLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minuta
-  max: 100, // Maksymalnie 100 żądań na IP
-  message: 'Zbyt wiele żądań z tego IP, spróbuj ponownie za minutę.',
-  standardHeaders: true, // Włącza nagłówki RateLimit (np. RateLimit-Remaining)
-  legacyHeaders: false, // Wyłącza stare nagłówki X-RateLimit
-  /**
-   * Funkcja wywoływana przy przekroczeniu limitu.
-   * Loguje informacje o IP, które przekroczyło limit.
-   * @param {import('express').Request} req - Obiekt żądania Express.
-   * @param {import('express').Response} res - Obiekt odpowiedzi Express.
-   */
-  onLimitReached: (req, res) => {
-    console.log(`Limit przekroczony dla IP: ${req.ip}`);
-  }
-});
-
-// Zastosuj globalny limiter dla wszystkich tras
-app.use(globalLimiter);
-
-/**
  * Konwertuje datę w formacie ISO na format MySQL DATETIME.
  * @function toMySQLDateTime
  * @param {string} dateString - Data w formacie ISO (np. "2025-05-28T12:00:00Z").
@@ -78,6 +53,35 @@ function toMySQLDateTime(dateString) {
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
+/**
+ * Globalny rate-limiter dla wszystkich żądań przychodzących.
+ * Ogranicza liczbę żądań do 100 na minutę na adres IP, aby zapobiec przeciążeniu serwera.
+ * @type {import('express-rate-limit').RateLimit}
+ */
+const globalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuta
+  max: 100, // Maksymalnie 100 żądań na IP
+  standardHeaders: true, // Włącza nagłówki RateLimit (np. RateLimit-Remaining)
+  legacyHeaders: false, // Wyłącza stare nagłówki X-RateLimit
+  /**
+   * Funkcja middleware wywoływana przy przekroczeniu limitu.
+   * Loguje IP przekraczające limit i zwraca odpowiedź HTTP 429.
+   * @param {import('express').Request} req - Obiekt żądania Express.
+   * @param {import('express').Response} res - Obiekt odpowiedzi Express.
+   * @param {import('express').NextFunction} next - Funkcja next Express.
+   * @param {import('express-rate-limit').Options} options - Opcje rate-limitera.
+   */
+  handler: (req, res, next, options) => {
+    console.log(`Limit przekroczony dla IP: ${req.ip} o ${new Date().toISOString()}`);
+    res.status(options.statusCode).send({
+      error: 'Zbyt wiele żądań z tego IP, spróbuj ponownie za minutę.'
+    });
+  }
+});
+
+// Zastosuj globalny limiter dla wszystkich tras
+app.use(globalLimiter);
 
 const MySQLStore = require('express-mysql-session')(session);
 const pool = require('./db');

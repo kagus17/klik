@@ -54,17 +54,21 @@ const resetLimiter = rateLimit({
 const registerLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minut
   max: 5, // Maksymalnie 5 prób rejestracji
-  message: 'Zbyt wiele prób rejestracji, spróbuj ponownie za 15 minut.',
   standardHeaders: true,
   legacyHeaders: false,
   /**
-   * Funkcja wywoływana przy przekroczeniu limitu rejestracji.
-   * Loguje informacje o próbie nadużycia.
+   * Funkcja middleware wywoływana przy przekroczeniu limitu rejestracji.
+   * Loguje IP przekraczające limit i zwraca odpowiedź HTTP 429.
    * @param {import('express').Request} req - Obiekt żądania Express.
    * @param {import('express').Response} res - Obiekt odpowiedzi Express.
+   * @param {import('express').NextFunction} next - Funkcja next Express.
+   * @param {import('express-rate-limit').Options} options - Opcje rate-limitera.
    */
-  onLimitReached: (req, res) => {
-    console.log(`Limit rejestracji przekroczony dla IP: ${req.ip}`);
+  handler: (req, res, next, options) => {
+    console.log(`Limit rejestracji przekroczony dla IP: ${req.ip} o ${new Date().toISOString()}`);
+    res.status(options.statusCode).send({
+      error: 'Zbyt wiele prób rejestracji, spróbuj ponownie za 15 minut.'
+    });
   }
 });
 
