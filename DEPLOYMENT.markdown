@@ -71,11 +71,12 @@ Niniejszy dokument opisuje wdrożenie aplikacji **MyMemoryMatch** (gra multiplay
   - Ustawienia: „Dzienniki usługi App Service” → „Rejestrowanie aplikacji (system plików)”, poziom „Informacje”, przechowywanie 7 dni.
   - **Cel**: Debugowanie błędów aplikacji (np. crash `server.js`, problemy z Socket.IO).
 - **Rate-limiting**:
-  - Kod w `server.js`:
-    - Globalny: 100 żądań/minutę na IP.
-    - `/auth/register`: 5 prób/15 minut na IP.
+  - Kod w `server.js` (zgodny z `express-rate-limit` v7):
+    - Globalny: 100 żądań/minutę na IP, odpowiedź JSON przy przekroczeniu (HTTP 429).
+    - `/auth/register`: 5 prób/15 minut na IP, odpowiedź JSON przy przekroczeniu.
     - Komentarze JSDoc dla dokumentacji.
-  - **Cel**: Ochrona przed przeciążeniem serwera i atakami (np. bruteforce, DDoS).
+    - Logowanie przekroczeń limitu z IP i czasem (widoczne w „Strumień dziennika”).
+  - **Cel**: Ochrona przed przeciążeniem serwera i atakami (np. DDoS, bruteforce).
 - **Alerty**:
   - Ustawienia: „Monitorowanie” → „Alerty” → reguła „BledyHttpMyKlik” dla sygnału „Http Server Errors” (próg: >1, okres: 5 minut).
   - **Cel**: Powiadomienie e-mailem o błędach HTTP 5xx (np. crash serwera).
