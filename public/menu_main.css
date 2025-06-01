@@ -350,7 +350,10 @@ th {
 
 #leaderboard {
   width: 100%;
-  display: flex;
+  height: 90%;
+  overflow-y: auto;
+  overflow-x: auto;
+  display: block;
   justify-content: center;
   align-items: flex-start;
   padding: 0;
@@ -368,6 +371,10 @@ th {
   background: transparent;
 }
 
+#leaderboard thead {
+  display: table-header-group;
+}
+
 #leaderboard th, #leaderboard td {
   text-align: center;
   vertical-align: middle;
@@ -377,6 +384,9 @@ th {
 }
 
 #leaderboard th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   font-weight: bold;
   color: #fff;
   background: rgba(83, 25, 175, 0.7);
