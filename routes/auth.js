@@ -1,3 +1,21 @@
+/**
+ * @file auth.js
+ * @description Moduł Express obsługujący trasy uwierzytelniania, w tym rejestrację, logowanie, odzyskiwanie hasła i resetowanie hasła. Wykorzystuje ograniczenie liczby żądań i walidację danych.
+ * @author KL, MF, DA, ŁW
+ * @version 1.0.0
+ * @date 2025-05-31
+ */
+
+/**
+ * @module AuthRoutes
+ * @requires express
+ * @requires bcrypt
+ * @requires ../db
+ * @requires dotenv
+ * @requires express-rate-limit
+ * @requires crypto
+ * @requires nodemailer
+ */
 const express = require('express');
 const bcrypt = require('bcrypt');
 const db = require('../db');
@@ -6,30 +24,92 @@ require('dotenv').config();
 
 const rateLimit = require('express-rate-limit');
 
+/**
+ * Ogranicznik liczby prób logowania.
+ * @constant {Object}
+ * @description Ogranicza do 10 prób logowania w ciągu 15 minut.
+ */
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minut
   max: 10, // max 10 prób na 15 minut
   message: { error: 'Za dużo prób logowania. Spróbuj ponownie później.' }
 });
 
+/**
+ * Ogranicznik liczby prób resetu hasła.
+ * @constant {Object}
+ * @description Ogranicza do 5 prób resetu hasła w ciągu 15 minut.
+ */
 const resetLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
   message: { error: 'Za dużo prób resetu hasła. Spróbuj ponownie później.' }
 });
 
+/**
+ * Rate-limiter dla endpointu rejestracji (/auth/register).
+ * Ogranicza liczbę prób rejestracji do 5 na 15 minut na IP, aby zapobiec masowemu tworzeniu kont.
+ * @type {import('express-rate-limit').RateLimit}
+ */
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minut
+  max: 5, // Maksymalnie 5 prób rejestracji
+  standardHeaders: true,
+  legacyHeaders: false,
+  /**
+   * Funkcja middleware wywoływana przy przekroczeniu limitu rejestracji.
+   * Loguje IP przekraczające limit i zwraca odpowiedź HTTP 429.
+   * @param {import('express').Request} req - Obiekt żądania Express.
+   * @param {import('express').Response} res - Obiekt odpowiedzi Express.
+   * @param {import('express').NextFunction} next - Funkcja next Express.
+   * @param {import('express-rate-limit').Options} options - Opcje rate-limitera.
+   */
+  handler: (req, res, next, options) => {
+    console.log(`Limit rejestracji przekroczony dla IP: ${req.ip} o ${new Date().toISOString()}`);
+    res.status(options.statusCode).send({
+      error: 'Zbyt wiele prób rejestracji, spróbuj ponownie za 15 minut.'
+    });
+  }
+});
+
+/**
+ * Waliduje nazwę użytkownika.
+ * @function
+ * @param {string} username - Nazwa użytkownika do sprawdzenia.
+ * @returns {boolean} Czy nazwa użytkownika jest prawidłowa (3-20 znaków, tylko litery, cyfry, podkreślenia).
+ */
 function validateUsername(username) {
   return typeof username === 'string' && /^[a-zA-Z0-9_]{3,20}$/.test(username);
 }
+/**
+ * Waliduje adres e-mail.
+ * @function
+ * @param {string} email - Adres e-mail do sprawdzenia.
+ * @returns {boolean} Czy adres e-mail jest prawidłowy.
+ */
 function validateEmail(email) {
   return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+/**
+ * Waliduje hasło.
+ * @function
+ * @param {string} password - Hasło do sprawdzenia.
+ * @returns {boolean} Czy hasło spełnia wymagania (min. 8 znaków, mała i wielka litera, cyfra, znak specjalny).
+ */
 function validatePassword(password) {
   return typeof password === 'string' && /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
 }
 
-// Rejestracja
-router.post('/register', async (req, res) => {
+/**
+ * Trasa do rejestracji nowego użytkownika.
+ * @name POST/auth/register
+ * @function
+ * @async
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} Odpowiedź JSON z informacją o sukcesie lub błędzie.
+ */
+router.post('/register',registerLimiter, async (req, res) => {
   const { username, password, email } = req.body;
 
   if (!validateUsername(username)) {
@@ -61,7 +141,15 @@ router.post('/register', async (req, res) => {
   res.json({ success: true });
 });
 
-// Logowanie
+/**
+ * Trasa do logowania użytkownika.
+ * @name POST/auth/login
+ * @function
+ * @async
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} Odpowiedź JSON z informacją o sukcesie lub błędzie.
+ */
 router.post('/login',loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   if (!validateUsername(username) || !validatePassword(password)) {
@@ -80,7 +168,15 @@ router.post('/login',loginLimiter, async (req, res) => {
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-// Endpoint do generowania tokenu resetu hasła
+/**
+ * Trasa do generowania tokenu resetu hasła.
+ * @name POST/auth/forgot-password
+ * @function
+ * @async
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} Odpowiedź JSON z informacją o sukcesie lub błędzie.
+ */
 router.post('/forgot-password', resetLimiter, async (req, res) => {
   const { email } = req.body;
 
@@ -125,6 +221,15 @@ router.post('/forgot-password', resetLimiter, async (req, res) => {
   }
 });
 
+/**
+ * Trasa do resetowania hasła użytkownika.
+ * @name POST/auth/reset-password
+ * @function
+ * @async
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} Odpowiedź JSON z informacją o sukcesie lub błędzie.
+ */
 router.post('/reset-password', async (req, res) => {
   const { token, newPassword } = req.body;
    if (!validatePassword(newPassword)) {

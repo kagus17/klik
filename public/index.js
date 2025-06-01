@@ -1,3 +1,20 @@
+/**
+ * @file index.js
+ * @description Skrypt obsługujący logowanie i rejestrację użytkowników na stronie głównej aplikacji. Pobiera token CSRF, waliduje hasła i komunikuje się z serwerem.
+ * @author KL, MF, DA, ŁW
+ * @version 1.0.0
+ * @date 2025-05-31
+ */
+
+/**
+ * @module AuthClient
+ */
+
+/**
+ * Inicjalizuje nasłuchiwanie zdarzenia kliknięcia przycisku logowania dla funkcji zapamiętywania sesji.
+ * @function
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.querySelector('#login-form button[type="submit"]');
   if (loginBtn && typeof lsRememberMe === 'function') {
@@ -5,12 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+/**
+ * Inicjalizuje obsługę logowania i rejestracji, pobierając token CSRF i ustawiając nasłuchiwacze formularzy.
+ * @async
+ * @function
+ */
 async function init() {
 const status = document.getElementById('status');
     const csrfRes = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
     const { csrfToken } = await csrfRes.json();
 
-    // Obsługa logowania
+ /**
+     * Obsługuje wysyłanie formularza logowania.
+     * @function
+     * @listens submit
+     * @param {Event} e - Zdarzenie submit formularza.
+     */
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -36,7 +63,12 @@ const status = document.getElementById('status');
     }
     });
 
-    // Funkcja walidacji hasła
+   /**
+     * Waliduje hasło pod kątem długości i zawartości.
+     * @function
+     * @param {string} password - Hasło do sprawdzenia.
+     * @returns {boolean} Czy hasło spełnia wymagania.
+     */
     function validatePassword(password) {
       const minLength = 8;
       const hasUpperCase = /[A-Z]/.test(password);
@@ -56,7 +88,12 @@ const status = document.getElementById('status');
       return false;
     }
 
-    // Obsługa rejestracji
+    /**
+     * Obsługuje wysyłanie formularza rejestracji.
+     * @function
+     * @listens submit
+     * @param {Event} e - Zdarzenie submit formularza.
+     */
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);

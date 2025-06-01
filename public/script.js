@@ -1,4 +1,28 @@
+/**
+ * @file script.js
+ * @description Główny skrypt gry pamięciowej w trybie jedno- i wieloosobowym. Odpowiada za pobieranie tokenu CSRF, zarządzanie dźwiękiem, logiką gry, komunikacją z serwerem przez Socket.IO oraz zapisywaniem wyników.
+ * @author KL, MF, DA, ŁW
+ * @version 1.0.0
+ * @date 2025-05-31
+ */
+
+/**
+ * @module GameClient
+ * @requires socket.io-client
+ */
+
+/**
+ * Globalny token CSRF używany do zabezpieczenia żądań HTTP.
+ * @type {string}
+ */
 let csrfToken = '';
+
+/**
+ * Pobiera token CSRF z serwera przy starcie aplikacji.
+ * @async
+ * @function
+ * @throws {Error} Jeśli nie uda się pobrać tokenu CSRF.
+ */
 (async () => {
     try {
         const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
@@ -9,62 +33,119 @@ let csrfToken = '';
     }
 })();
 
+/**
+ * Klasa zarządzająca dźwiękami w grze.
+ * @class
+ */
 class AudioController {
+    /**
+     * Inicjalizuje kontroler audio z dźwiękami gry.
+     * @constructor
+     */
     constructor() {
+        /** @type {HTMLAudioElement} Muzyka w tle. */
         this.bgMusic = new Audio('Assets/Audio/ark.mp3');
+        /** @type {HTMLAudioElement} Dźwięk odwracania karty. */
         this.flipSound = new Audio('Assets/Audio/flip.wav');
+        /** @type {HTMLAudioElement} Dźwięk dopasowania kart. */
         this.matchSound = new Audio('Assets/Audio/match.wav');
+        /** @type {HTMLAudioElement} Dźwięk zwycięstwa. */
         this.victorySound = new Audio('Assets/Audio/victory.wav');
+        /** @type {HTMLAudioElement} Dźwięk przegranej. */
         this.gameOverSound = new Audio('Assets/Audio/gameOver.wav');
         this.bgMusic.volume = 0.1;
         this.bgMusic.loop = true;
     }
+    /** Rozpoczyna odtwarzanie muzyki w tle. */
     startMusic() {
         this.bgMusic.play();
     }
+
+    /** Zatrzymuje muzykę w tle i resetuje jej czas. */
     stopMusic() {
         this.bgMusic.pause();
         this.bgMusic.currentTime = 0;
     }
+
+    /** Odtwarza dźwięk odwracania karty. */
     flip() {
         this.flipSound.play();
     }
+
+    /** Odtwarza dźwięk dopasowania kart. */
     match() {
         this.matchSound.play();
     }
+
+    /** Odtwarza dźwięk zwycięstwa i zatrzymuje muzykę w tle. */
     victory() {
         this.stopMusic();
         this.victorySound.play();
     }
+
+    /** Odtwarza dźwięk przegranej i zatrzymuje muzykę w tle. */
     gameOver() {
         this.stopMusic();
         this.gameOverSound.play();
     }
 }
 
+/**
+ * Połączenie Socket.IO z serwerem.
+ * @constant {Object}
+ */
 const socket = io();
 
+/**
+ * Klasa zarządzająca logiką gry pamięciowej.
+ * @class
+ */
 class MixOrMatch {
+    /**
+     * Inicjalizuje grę z podanymi parametrami.
+     * @constructor
+     * @param {string} difficulty - Poziom trudności ('easy', 'medium', 'hard').
+     * @param {number} totalTime - Całkowity czas gry w sekundach.
+     * @param {Array<HTMLElement>} cards - Lista elementów HTML kart.
+     * @param {string} loggedInUsername - Nazwa zalogowanego użytkownika.
+     */
     constructor(difficulty,totalTime, cards, loggedInUsername) {
+        /** @type {string} Nazwa zalogowanego użytkownika. */
         this.loggedInUsername = loggedInUsername;
+        /** @type {Array<HTMLElement>} Tablica kart w grze. */
         this.cardsArray = cards;
+        /** @type {number} Całkowity czas gry w sekundach. */
         this.totalTime = totalTime;
+        /** @type {number} Pozostały czas gry w sekundach. */
         this.timeRemaining = totalTime;
+        /** @type {HTMLElement} Element wyświetlający pozostały czas. */
         this.timer = document.getElementById('time-remaining');
+        /** @type {HTMLElement} Element wyświetlający liczbę odwróceń. */
         this.ticker = document.getElementById('flips');
+        /** @type {HTMLElement} Element wyświetlający liczbę odwróceń przeciwnika. */
         this.opponentFlips = document.getElementById('opponent-flips');
+        /** @type {HTMLElement} Element wyświetlający nazwę przeciwnika. */
         this.opponentNameDisplay = document.getElementById('opponent-name');
+        /** @type {HTMLElement} Element wyświetlający poziom trudności. */
         this.difficultyDisplay = document.getElementById('difficulty-display');
+        /** @type {AudioController} Kontroler audio gry. */
         this.audioController = new AudioController();
+        /** @type {string|null} Kod pokoju dla gry wieloosobowej. */
         this.roomCode = new URLSearchParams(window.location.search).get('code');
+        /** @type {string} Poziom trudności gry. */
         this.difficulty = difficulty || 'easy'; // Ustaw domyślny poziom trudności na 'easy'
+        /** @type {boolean} Czy gra jest w trybie wieloosobowym. */
         this.isMultiplayer = !!this.roomCode;
+        /** @type {boolean} Czy wyniki gry zostały wyświetlone. */
         this.resultsDisplayed = false; 
         
-        // Inicjalizuj wszystkie wymagane właściwości
+        /** @type {number} Całkowita liczba kliknięć (odwróceń). */
         this.totalClicks = 0;
+        /** @type {HTMLElement|null} Karta do sprawdzenia przy dopasowaniu. */
         this.cardToCheck = null;
+        /** @type {Array<HTMLElement>} Lista dopasowanych kart. */
         this.matchedCards = []; // DODAJ TĘ LINIĘ
+        /** @type {boolean} Czy gra jest zajęta (np. podczas animacji). */
         this.busy = false;
 
         if (this.isMultiplayer) {
@@ -136,7 +217,9 @@ socket.on('time-up-results', ({ status }) => {
         }
     }
 
-    
+     /**
+     * Rozpoczyna grę, inicjalizując stan i tasując karty.
+     */
     startGame() {
         this.totalClicks = 0;
         this.cardToCheck = null;
@@ -160,22 +243,20 @@ socket.on('time-up-results', ({ status }) => {
         }, 1000);*/
         null
     }
-    /*gameOver() {
-        clearInterval(this.countdown);
-        this.audioController.gameOver();
-        document.getElementById('game-over-text').classList.add('visible');
-    }
-    victory() {
-        clearInterval(this.countdown);
-        this.audioController.victory();
-        document.getElementById('victory-text').classList.add('visible');
-    }*/
+
+    /**
+     * Ukrywa wszystkie karty.
+     */
     hideCards() {
         this.cardsArray.forEach(card => {
             card.classList.remove('visible');
             card.classList.remove('matched');
         });
     }
+    /**
+     * Odwraca kartę i sprawdza dopasowanie.
+     * @param {HTMLElement} card - Karta do odwrócenia.
+     */
     flipCard(card) {
         if(this.canFlipCard(card)) {
             this.audioController.flip();
@@ -198,6 +279,9 @@ socket.on('time-up-results', ({ status }) => {
         }
     }
 
+    /**
+     * Obsługuje zakończenie gry w przypadku przegranej.
+     */
     gameOver() {
     if (this.resultsDisplayed) return; // Jeśli wyniki już zostały wyświetlone, zakończ
     this.resultsDisplayed = true;
@@ -243,6 +327,9 @@ socket.on('time-up-results', ({ status }) => {
     }
 }
 
+    /**
+     * Obsługuje zakończenie gry w przypadku zwycięstwa.
+     */
     victory() {
         if (this.resultsDisplayed) return; // Jeśli wyniki już zostały wyświetlone, zakończ
         this.resultsDisplayed = true;
@@ -278,7 +365,10 @@ socket.on('time-up-results', ({ status }) => {
     }
     }
 
-
+    /**
+     * Sprawdza, czy dwie karty są dopasowane.
+     * @param {HTMLElement} card - Druga karta do sprawdzenia.
+     */
     checkForCardMatch(card) {
         if(this.getCardType(card) === this.getCardType(this.cardToCheck))
             this.cardMatch(card, this.cardToCheck);
@@ -287,6 +377,11 @@ socket.on('time-up-results', ({ status }) => {
 
         this.cardToCheck = null;
     }
+    /**
+     * Obsługuje dopasowanie dwóch kart.
+     * @param {HTMLElement} card1 - Pierwsza karta.
+     * @param {HTMLElement} card2 - Druga karta.
+     */
     cardMatch(card1, card2) {
         if (!this.cardsArray || this.cardsArray.length === 0) {
             console.error('cardsArray is not initialized or empty.');
@@ -301,6 +396,11 @@ socket.on('time-up-results', ({ status }) => {
         if(this.matchedCards.length === this.cardsArray.length)
             this.victory();
     }
+    /**
+     * Obsługuje niedopasowanie dwóch kart.
+     * @param {HTMLElement} card1 - Pierwsza karta.
+     * @param {HTMLElement} card2 - Druga karta.
+     */
     cardMismatch(card1, card2) {
         this.busy = true;
         setTimeout(() => {
@@ -309,6 +409,10 @@ socket.on('time-up-results', ({ status }) => {
             this.busy = false;
         }, 1000);
     }
+    /**
+     * Tasuje karty za pomocą algorytmu Fisher-Yates.
+     * @param {Array<HTMLElement>} cardsArray - Tablica kart do potasowania.
+     */
     shuffleCards(cardsArray) { // Fisher-Yates Shuffle Algorithm.
         for (let i = cardsArray.length - 1; i > 0; i--) {
             let randIndex = Math.floor(Math.random() * (i + 1));
@@ -316,9 +420,19 @@ socket.on('time-up-results', ({ status }) => {
             cardsArray[i].style.order = randIndex;
         }
     }
+    /**
+     * Pobiera typ karty na podstawie źródła obrazka.
+     * @param {HTMLElement} card - Karta do sprawdzenia.
+     * @returns {string} Źródło obrazka karty.
+     */
     getCardType(card) {
         return card.getElementsByClassName('card-value')[0].src;
     }
+    /**
+     * Sprawdza, czy karta może być odwrócona.
+     * @param {HTMLElement} card - Karta do sprawdzenia.
+     * @returns {boolean} Czy karta może być odwrócona.
+     */
     canFlipCard(card) {
         return !this.busy && !this.matchedCards.includes(card) && card !== this.cardToCheck;
     }
@@ -330,6 +444,14 @@ if (document.readyState == 'loading') {
     ready();
 }
 
+/**
+ * Wyświetla modal z wynikami gry.
+ * @param {string} playerName - Nazwa gracza.
+ * @param {number} flips - Liczba odwróceń.
+ * @param {number} timePlayed - Czas gry w sekundach.
+ * @param {number} matches - Liczba dopasowań.
+ * @param {boolean} isWinner - Czy gracz wygrał.
+ */
 function showResultsModal(playerName, flips, timePlayed, matches, isWinner) {
     // Pobierz istniejący modal
     const modal = document.getElementById('results-modal');
@@ -345,6 +467,17 @@ function showResultsModal(playerName, flips, timePlayed, matches, isWinner) {
     modal.classList.add('visible');
 }
 
+/**
+ * Zapisuje wyniki gry na serwerze.
+ * @param {string} playerName - Nazwa gracza.
+ * @param {string} roomCode - Kod pokoju.
+ * @param {number} flips - Liczba odwróceń.
+ * @param {number} timePlayed - Czas gry w sekundach.
+ * @param {number} matches - Liczba dopasowań.
+ * @param {string} difficulty - Poziom trudności.
+ * @param {string} startTime - Czas rozpoczęcia (ISO).
+ * @param {string} endTime - Czas zakończenia (ISO).
+ */
 function saveResult(playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime) {
     fetch('/game/save-result', {
         method: 'POST',
@@ -361,10 +494,20 @@ function saveResult(playerName, roomCode, flips, timePlayed, matches, difficulty
       });
 }
 
+/**
+ * Oblicza wynik gry na podstawie czasu i dopasowań.
+ * @param {number} timePlayed - Czas gry w sekundach.
+ * @param {number} matches - Liczba dopasowań.
+ * @returns {number} Wynik gry.
+ */
 function calculateScore(timePlayed, matches) {
     return matches * 100 - timePlayed * 2; // Każde dopasowanie daje 100 punktów, czas odejmuje 2 punkty za sekundę
 }
 
+/**
+ * Inicjalizuje grę po załadowaniu strony.
+ * @async
+ */
 async function ready() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomCode = urlParams.get('code');

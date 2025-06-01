@@ -1,6 +1,8 @@
 <!DOCTYPE html>
+<!-- Strona główna aplikacji, zawierająca formularze logowania i rejestracji użytkownika. -->
 <html lang="pl">
 <head>
+  <!-- Metadane i zasoby strony -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';">
   <meta charset="UTF-8">
   <link rel="stylesheet" href="login_main.css">
@@ -11,16 +13,22 @@
   
   <!-- Sekcja logowania -->
   <div class="background">
+    <!-- Nagłówek sekcji logowania -->
     <h1>Zaloguj się</h1>
+    <!-- Formularz logowania -->
     <form id="login-form">
+      <!-- Pole wprowadzania nazwy użytkownika -->
       <div class="input-space">
         <input type="text" name="username" placeholder="Login" id="login" required>
       </div>
+      <!-- Pole wprowadzania hasła -->
       <div class="input-space">
         <input type="password" name="password" placeholder="Hasło" required>
       </div>
+      <!-- Przycisk wysyłania formularza -->
       <button type="submit" class="btn">Zaloguj</button>
     </form>
+    <!-- Link do odzyskiwania hasła -->
     <div class="forgot-password">
       Nie pamiętasz hasła? <a href="recovery_passwd.html"><b>Przypomnij</b></a>
     </div>
@@ -34,17 +42,22 @@
 
   <!-- Sekcja rejestracji -->
   <div class="register background">
+    <!-- Nagłówek sekcji rejestracji -->
     <h1>Rejestracja</h1>
+    <!-- Formularz rejestracji -->
     <form id="register-form">
       <div class="input-space">
+        <!-- Górna część formularza z polami nazwy użytkownika i e-maila -->
         <div class="upper-form">
           <input type="text" name="username" placeholder="Login" required>
           <input type="password" name="password" placeholder="Hasło" required>
         </div>
       </div>
+       <!-- Pole wprowadzania adresu e-mail -->
       <div class="input-space" id="email">
         <input type="email" name="email" placeholder="Email" required>
       </div>
+      <!-- Przycisk wysyłania formularza -->
       <button type="submit" class="btn">Zarejestruj</button>
     </form>
   </div>

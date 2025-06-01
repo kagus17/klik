@@ -1,16 +1,47 @@
+/**
+ * @file menu.js
+ * @description Skrypt obsługujący interfejs menu gry, w tym wybór poziomu trudności, tworzenie i dołączanie do pokojów, wylogowanie, wyświetlanie wyników i historii gier.
+ * @author KL, MF, DA, ŁW
+ * @version 1.0.0
+ * @date 2025-05-31
+ */
+
+/**
+ * @module MenuClient
+ */
+
+/**
+ * Globalny token CSRF używany do zabezpieczenia żądań HTTP.
+ * @type {string}
+ */
 let csrfToken = '';
+
+/**
+ * Pobiera token CSRF z serwera przy starcie aplikacji.
+ * @async
+ * @function
+ */
 (async () => {
   const res = await fetch('/auth/csrf-token', { credentials: 'same-origin' });
   const data = await res.json();
   csrfToken = data.csrfToken;
 })();
 
+/**
+ * Inicjalizuje interfejs menu po załadowaniu strony.
+ * @function
+ * @listens DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', async function() {
   // Ukryj overlay i historię na start
   document.getElementById('history-overlay').style.display = 'none';
   document.getElementById('history-container').style.display = 'none';
 
-  // Obsługa przycisku "Historia gier"
+  /**
+     * Wyświetla historię gier po kliknięciu przycisku.
+     * @function
+     * @listens click
+     */
   document.getElementById('show-history').addEventListener('click', () => {
     document.getElementById('history-overlay').style.display = 'block';
     document.getElementById('history-container').style.display = 'block';
@@ -18,7 +49,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     // document.querySelector('.last-game').style.display = 'none';
   });
 
-  // Obsługa przycisku "Powrót"
+  /**
+     * Ukrywa historię gier i wraca do widoku ostatniej gry.
+     * @function
+     * @listens click
+     */
   document.getElementById('back-to-last').addEventListener('click', () => {
     document.getElementById('history-overlay').style.display = 'none';
     document.getElementById('history-container').style.display = 'none';
@@ -26,7 +61,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // document.querySelector('.last-game').style.display = '';
   });
 
-  // Pobierz i wyświetl najlepsze wyniki
+  /**
+     * Pobiera i wyświetla najlepsze wyniki z rankingu.
+     * @async
+     */
   try {
     const res = await fetch('/leaderboard');
     const data = await res.json();
@@ -61,6 +99,10 @@ document.getElementById('history-container').style.display = 'none'; // Ukryj hi
     const prevBtn = document.getElementById('prev-difficulty');
     const nextBtn = document.getElementById('next-difficulty');
 
+     /**
+     * Aktualizuje wyświetlany poziom trudności.
+     * @function
+     */
     function updateDifficulty() {
       label.textContent = difficulties[currentIndex];
       label.setAttribute('value', difficultyValues[currentIndex]);
@@ -79,7 +121,10 @@ document.getElementById('history-container').style.display = 'none'; // Ukryj hi
 
     const status = document.getElementById('status');
 
-    // Sprawdź, czy użytkownik jest zalogowany
+     /**
+     * Sprawdza, czy użytkownik jest zalogowany, i aktualizuje status.
+     * @async
+     */
     (async () => {
     const res = await fetch('/session/check');
     const data = await res.json();
@@ -92,6 +137,11 @@ document.getElementById('history-container').style.display = 'none'; // Ukryj hi
     }
     })();
 
+    /**
+     * Tworzy nowy pokój gry z wybranym poziomem trudności.
+     * @function
+     * @listens click
+     */
     document.getElementById('create-room').addEventListener('click', async () => {
       const difficulty = document.getElementById('difficulty-label').value; // Pobierz wybrany poziom trudności
       const res = await fetch('/room/create', { method: 'POST', headers: { 'CSRF-Token': csrfToken },credentials: 'same-origin' });
@@ -106,6 +156,11 @@ document.getElementById('history-container').style.display = 'none'; // Ukryj hi
       }
     });
 
+    /**
+     * Dołącza do istniejącego pokoju na podstawie kodu.
+     * @function
+     * @listens submit
+     */
     document.getElementById('join-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -127,17 +182,31 @@ document.getElementById('history-container').style.display = 'none'; // Ukryj hi
       }
     });
 
+     /**
+     * Wylogowuje użytkownika i przekierowuje do strony logowania.
+     * @function
+     * @listens click
+     */
     document.getElementById('logout').addEventListener('click', async () => {
     await fetch('/auth/logout', { method: 'POST', headers: { 'CSRF-Token': csrfToken },credentials: 'same-origin', });
     window.location.href = '/index.html';
     });
 
-    // Funkcja do obliczania punktów
+     /**
+     * Oblicza punkty na podstawie liczby dopasowań i czasu gry.
+     * @function
+     * @param {number} matches - Liczba dopasowań.
+     * @param {number} time_played - Czas gry w sekundach.
+     * @returns {number} Obliczone punkty.
+     */
 function calculatePoints(matches, time_played) {
   return matches * (100-time_played);
 }
 
-// Pobierz i wyświetl ostatnią grę
+/**
+     * Pobiera i wyświetla dane ostatniej gry.
+     * @async
+     */
 (async () => {
   const res = await fetch('/game/last-result');
   const data = await res.json();
@@ -185,6 +254,11 @@ function calculatePoints(matches, time_played) {
   noGame.style.display = 'none';
 })();
 
+ /**
+     * Pobiera i wyświetla historię wszystkich gier użytkownika.
+     * @function
+     * @listens click
+     */
 document.getElementById('show-history').addEventListener('click', async () => {
   const historyDiv = document.getElementById('history-container');
   historyDiv.style.display = '';
@@ -248,6 +322,11 @@ if (!row.opponent_name) {
   });
 });
 
+/**
+     * Ukrywa historię gier po kliknięciu przycisku powrotu.
+     * @function
+     * @listens click
+     */
 document.getElementById('back-to-last').addEventListener('click', () => {
   document.getElementById('history-container').style.display = 'none';
   document.querySelector('.last-game').style.display = '';

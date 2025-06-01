@@ -1,8 +1,25 @@
 /**
  * @file server.js
- * @description Główny plik uruchamiający serwer aplikacji multiplayerowej (gra 1v1 online).
- * @author [KL MF DA ŁW]
- * @date [28.05.2025]
+ * @description Główny plik serwera aplikacji multiplayerowej umożliwiającej rozgrywkę 1v1 online. Odpowiada za konfigurację serwera Express, Socket.IO, sesji użytkownika, zabezpieczeń CSRF oraz obsługę pokojów gry i wyników.
+ * @author KL, MF, DA, ŁW
+ * @version 1.0.0
+ * @date 2025-05-28
+ */
+
+/**
+ * @module Server
+ * @requires express
+ * @requires express-session
+ * @requires socket.io-express-session
+ * @requires http
+ * @requires socket.io
+ * @requires path
+ * @requires csurf
+ * @requires express-mysql-session
+ * @requires ./db
+ * @requires ./routes/auth
+ * @requires ./routes/room
+ * @requires ./routes/leaderboard
  */
 
 const express = require('express');
@@ -13,10 +30,15 @@ const { Server } = require('socket.io');
 const path = require('path');
 const csurf = require('csurf');
 
+const rateLimit = require('express-rate-limit');
+
 /**
- * Konwertuje datę w formacie string na format MySQL DATETIME.
- * @param {string} dateString - Data w formacie ISO.
- * @returns {string} Data w formacie 'YYYY-MM-DD HH:MM:SS'
+ * Konwertuje datę w formacie ISO na format MySQL DATETIME.
+ * @function toMySQLDateTime
+ * @param {string} dateString - Data w formacie ISO (np. "2025-05-28T12:00:00Z").
+ * @returns {string} Data w formacie MySQL DATETIME ('YYYY-MM-DD HH:MM:SS').
+ * @example
+ * toMySQLDateTime('2025-05-28T12:00:00Z') // Zwraca '2025-05-28 12:00:00'
  */
 function toMySQLDateTime(dateString) {
   const date = new Date(dateString);
@@ -32,11 +54,42 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+/**
+ * Globalny rate-limiter dla wszystkich żądań przychodzących.
+ * Ogranicza liczbę żądań do 100 na minutę na adres IP, aby zapobiec przeciążeniu serwera.
+ * @type {import('express-rate-limit').RateLimit}
+ */
+const globalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuta
+  max: 100, // Maksymalnie 100 żądań na IP
+  standardHeaders: true, // Włącza nagłówki RateLimit (np. RateLimit-Remaining)
+  legacyHeaders: false, // Wyłącza stare nagłówki X-RateLimit
+  /**
+   * Funkcja middleware wywoływana przy przekroczeniu limitu.
+   * Loguje IP przekraczające limit i zwraca odpowiedź HTTP 429.
+   * @param {import('express').Request} req - Obiekt żądania Express.
+   * @param {import('express').Response} res - Obiekt odpowiedzi Express.
+   * @param {import('express').NextFunction} next - Funkcja next Express.
+   * @param {import('express-rate-limit').Options} options - Opcje rate-limitera.
+   */
+  handler: (req, res, next, options) => {
+    console.log(`Limit przekroczony dla IP: ${req.ip} o ${new Date().toISOString()}`);
+    res.status(options.statusCode).send({
+      error: 'Zbyt wiele żądań z tego IP, spróbuj ponownie za minutę.'
+    });
+  }
+});
+
+// Zastosuj globalny limiter dla wszystkich tras
+app.use(globalLimiter);
+
 const MySQLStore = require('express-mysql-session')(session);
 const pool = require('./db');
 
 /**
- * Konfiguracja przechowywania sesji w MySQL.
+ * Konfiguracja magazynu sesji w bazie danych MySQL.
+ * @constant {MySQLStore} sessionStore
+ * @description Inicjalizuje magazyn sesji z automatycznym tworzeniem tabeli i usuwaniem wygasłych sesji.
  */
 const sessionStore = new MySQLStore({
   createDatabaseTable: true, // Automatyczne tworzenie tabeli sesji
@@ -60,7 +113,9 @@ const sessionStore = new MySQLStore({
 });
 
 /**
- * Middleware obsługujący sesje użytkowników.
+ * Middleware do zarządzania sesjami użytkowników.
+ * @constant {Function} sessionMiddleware
+ * @description Konfiguruje sesje z użyciem magazynu MySQL i ciasteczek HTTP.
  */
 const sessionMiddleware = session({
   secret: 'tajny-klucz',
@@ -81,7 +136,11 @@ app.use(sessionMiddleware);
 app.use(csurf());
 
 /**
- * Endpoint do pobrania tokena CSRF.
+ * Pobiera token CSRF dla żądań zabezpieczonych.
+ * @route GET /auth/csrf-token
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} JSON z tokenem CSRF.
  */
 app.get('/auth/csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
@@ -89,6 +148,10 @@ app.get('/auth/csrf-token', (req, res) => {
 
 /**
  * Middleware obsługujący błędy CSRF.
+ * @param {Error} err - Obiekt błędu.
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @param {Function} next - Funkcja do przekazania sterowania do kolejnego middleware.
  */
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
@@ -98,12 +161,17 @@ app.use((err, req, res, next) => {
 });
 
 /**
- * Udostępnienie sesji dla połączeń Socket.IO.
+ * Udostępnia sesje dla Socket.IO.
+ * @description Umożliwia Socket.IO korzystanie z sesji Express.
  */
 io.use(sharedSession(sessionMiddleware, {
   autoSave: true
 }));
 
+/**
+ * Ustawia nagłówki Content-Security-Policy dla zabezpieczenia aplikacji.
+ * @description Ogranicza źródła zasobów do zaufanych domen.
+ */
 app.use((req, res, next) => {
   res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self';");
   next();
@@ -118,13 +186,15 @@ const leaderboardRoutes = require('./routes/leaderboard');
 app.use(leaderboardRoutes);
 
 /**
- * Obiekt przechowujący dane o pokojach gier.
- * @type {Object<string, {players: Array, difficulty: string, timeRemaining: number, kicked: Array, allowed?: Array, interval?: NodeJS.Timeout, winner?: string}>}
+ * Obiekt przechowujący dane o aktywnych pokojach gry.
+ * @type {Object.<string, {players: Array<{id: string, username: string, flips?: number, timePlayed?: number, matches?: number}>, difficulty: string, timeRemaining: number, kicked: Array<string>, allowed?: Array<string>, interval?: NodeJS.Timeout, winner?: string}>}
+ * @description Przechowuje informacje o graczach, poziomie trudności, czasie gry i statusie pokoju.
  */
 const rooms = {};
 
 /**
- * Inicjalizacja połączenia Socket.IO.
+ * Inicjalizuje obsługę połączeń Socket.IO.
+ * @description Obsługuje zdarzenia związane z dołączaniem do pokojów, rozgrywką i rozłączaniem graczy.
  */
 io.on('connection', (socket) => {
   const user = socket.handshake.session.user;
@@ -134,6 +204,13 @@ io.on('connection', (socket) => {
     return;
   }
 
+  /**
+   * Obsługuje dołączanie gracza do pokoju gry.
+   * @event join-room
+   * @param {Object} data - Dane dołączania do pokoju.
+   * @param {string} data.roomCode - Kod pokoju gry.
+   * @param {string} data.difficulty - Poziom trudności gry.
+   */
   socket.on('join-room', async ({roomCode, difficulty}) => {
     if (!rooms[roomCode]) {
       rooms[roomCode] = { players: [], difficulty: difficulty, timeRemaining: 100, kicked: [] };
@@ -213,7 +290,12 @@ if (room.kicked && room.kicked.includes(username)) {
 
   }
 
-  // Funkcja obsługująca zakończenie gry z powodu upływu czasu
+/**
+   * Obsługuje zakończenie gry z powodu upływu czasu.
+   * @function handleGameOver
+   * @param {string} roomCode - Kod pokoju gry.
+   * @description Porównuje wyniki graczy i wysyła status gry (wygrana, przegrana, remis).
+   */
   function handleGameOver(roomCode) {
     const room = rooms[roomCode];
     if (!room || room.players.length < 2) return;
@@ -248,7 +330,16 @@ if (room.kicked && room.kicked.includes(username)) {
     handleGameOver(roomCode);
   });
 
-  // Obsługa zakończenia gry przez gracza
+/**
+   * Obsługuje zakończenie gry przez gracza.
+   * @event player-finished
+   * @param {Object} data - Dane wyniku gracza.
+   * @param {string} data.roomCode - Kod pokoju gry.
+   * @param {string} data.playerId - ID gracza (Socket.IO).
+   * @param {number} data.flips - Liczba odwróceń kart.
+   * @param {number} data.timePlayed - Czas gry w sekundach.
+   * @param {number} data.matches - Liczba dopasowań.
+   */
   socket.on('player-finished', ({ roomCode, playerId, flips, timePlayed, matches }) => {
     if (
     typeof roomCode !== 'string' ||
@@ -280,6 +371,11 @@ if (room.kicked && room.kicked.includes(username)) {
     }
   });
 
+  /**
+   * Obsługuje rozłączenie gracza.
+   * @event disconnect
+   * @description Usuwa gracza z pokoju i powiadamia drugiego gracza o rozłączeniu.
+   */
  socket.on('disconnect', () => {
   for (const roomCode in rooms) {
     const room = rooms[roomCode];
@@ -299,11 +395,25 @@ if (room.kicked && room.kicked.includes(username)) {
 });
 });
 
+
+/**
+   * Obsługuje kliknięcia gracza w grze.
+   * @event click
+   * @param {Object} data - Dane kliknięcia.
+   * @param {string} data.roomCode - Kod pokoju gry.
+   * @param {number} data.clicks - Liczba kliknięć.
+   */
   socket.on('click', ({ roomCode, clicks }) => {
     if (typeof roomCode !== 'string' || typeof clicks !== 'number') return;
     socket.to(roomCode).emit('opponent-clicked', clicks);
   });
 
+  /**
+   * Obsługuje zakończenie gry.
+   * @event game-over
+   * @param {Object} data - Dane zakończenia gry.
+   * @param {string} data.roomCode - Kod pokoju gry.
+   */
   socket.on('game-over', ({ roomCode}) => {
     if (typeof roomCode !== 'string') return;
     socket.to(roomCode).emit('game-ended');
@@ -311,7 +421,11 @@ if (room.kicked && room.kicked.includes(username)) {
 });
 
 /**
- * Endpoint testowy serwera.
+ * Testowy endpoint główny serwera.
+ * @route GET /
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {string} Wiadomość potwierdzająca działanie serwera.
  */
 app.get('/', (req, res) => {
   res.send('Serwer działa!');
@@ -320,7 +434,11 @@ app.get('/', (req, res) => {
 server.listen(8080, () => console.log('Serwer + Socket.IO działa na http://localhost:8080'));
 
 /**
- * Sprawdzenie aktualnej sesji użytkownika.
+ * Sprawdza status sesji użytkownika.
+ * @route GET /session/check
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} JSON z informacją o zalogowaniu i nazwą użytkownika.
  */
 app.get('/session/check', (req, res) => {
     if (req.session.user) {
@@ -334,7 +452,20 @@ const db = require('./db');
 const { create } = require('domain');
 
 /**
- * Zapis wyniku gry do bazy danych.
+ * Zapisuje wynik gry do bazy danych.
+ * @route POST /game/save-result
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} req.body - Dane wyniku gry.
+ * @param {string} req.body.playerName - Nazwa gracza.
+ * @param {string} req.body.roomCode - Kod pokoju gry.
+ * @param {number} req.body.flips - Liczba odwróceń kart.
+ * @param {number} req.body.timePlayed - Czas gry w sekundach.
+ * @param {number} req.body.matches - Liczba dopasowań.
+ * @param {string} req.body.difficulty - Poziom trudności.
+ * @param {string} req.body.startTime - Czas rozpoczęcia gry (ISO).
+ * @param {string} req.body.endTime - Czas zakończenia gry (ISO).
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} JSON z potwierdzeniem zapisu lub błędem.
  */
 app.post('/game/save-result', async (req, res) => {
     const { playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime } = req.body;
@@ -357,7 +488,11 @@ app.post('/game/save-result', async (req, res) => {
 });
 
 /**
- * Pobranie ostatniego wyniku użytkownika wraz z wynikiem przeciwnika.
+ * Pobiera ostatni wynik gry użytkownika i przeciwnika.
+ * @route GET /game/last-result
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} JSON z wynikami gracza i przeciwnika lub błędem.
  */
 app.get('/game/last-result', async (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
@@ -391,7 +526,11 @@ app.get('/game/last-result', async (req, res) => {
 });
 
 /**
- * Pobranie historii gier użytkownika.
+ * Pobiera historię gier użytkownika.
+ * @route GET /game/history
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} JSON z historią gier użytkownika lub błędem.
  */
 app.get('/game/history', async (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'Brak zalogowania' });
@@ -418,7 +557,11 @@ app.get('/game/history', async (req, res) => {
 });
 
 /**
- * Wylogowanie użytkownika i usunięcie sesji.
+ * Wylogowuje użytkownika i usuwa sesję.
+ * @route POST /auth/logout
+ * @param {Object} req - Obiekt żądania Express.
+ * @param {Object} res - Obiekt odpowiedzi Express.
+ * @returns {Object} JSON z potwierdzeniem wylogowania.
  */
   app.post('/auth/logout', (req, res) => {
     req.session.destroy(() => {
