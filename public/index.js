@@ -54,7 +54,16 @@ const status = document.getElementById('status');
       if (res.ok) {
         window.location.href = '/menu.html'; // Przejście do strony z pokojami
       } else {
-        const data = await res.json();
+       const data = await res.json(); // <- NAJPIERW pobierz dane!
+        Toastify({
+          text: data.error || "Błąd logowania.",
+          duration: 3000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#d32f2f",
+          stopOnFocus: true
+        }).showToast();
+        status.innerText = data.error || 'Błąd logowania.';
         status.innerText = data.error || 'Błąd logowania.';
       }
     }
