@@ -18,7 +18,7 @@
     }
 
     .background{
-      height: 500px;
+    height: 500px;
     width: 420px;
     max-width: 420px;
     background: transparent;
@@ -44,7 +44,7 @@
       
       .input-space input{
         box-shadow: inset 0 0 3px #CDCFD1;
-        width: 100%;
+        width: 89%;
         height: 100%;
         background: transparent;
         border: none;
@@ -201,6 +201,6 @@
 }
 
 img{
-	width:50px;
-	height:50px;
+	width:30px;
+	height:30px;
 }
