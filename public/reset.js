@@ -9,11 +9,12 @@
 /**
  * @module PasswordReset
  */
-
+	
 /**
  * Token resetowania hasła pobrany z parametrów URL.
  * @type {string|null}
  */
+ 
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
 
