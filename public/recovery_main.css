@@ -187,7 +187,7 @@
 }
 
 .go-back a {
-  display: flex;
+  display: inline-block; /* Allow the link to be styled as a block */
   color: inherit; /* Inherit the color from the parent element */
   text-decoration: none; /* Remove underline */
   font-size: 40px; /* Set font size */

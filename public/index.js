@@ -54,7 +54,16 @@ const status = document.getElementById('status');
       if (res.ok) {
         window.location.href = '/menu.html'; // Przejście do strony z pokojami
       } else {
-        const data = await res.json();
+       const data = await res.json(); // <- NAJPIERW pobierz dane!
+        Toastify({
+          text: data.error || "Błąd logowania.",
+          duration: 3000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#d32f2f",
+          stopOnFocus: true
+        }).showToast();
+        status.innerText = data.error || 'Błąd logowania.';
         status.innerText = data.error || 'Błąd logowania.';
       }
     }
@@ -100,7 +109,15 @@ const status = document.getElementById('status');
       const password = formData.get('password');
 
       if (!validatePassword(password)) {
-        status.innerText = 'Hasło musi zawierać co najmniej 8 znaków, małe i duże litery, liczby oraz znaki specjalne.';
+        Toastify({
+          text: 'Hasło musi zawierać co najmniej 8 znaków, małe i duże litery, liczby oraz znaki specjalne.',
+          duration: 6000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#f5f577", // żółty
+          stopOnFocus: true,
+          style: { color: "#222" }
+        }).showToast();
         return;
       }
       try{
@@ -115,14 +132,31 @@ const status = document.getElementById('status');
       });
 
       if (res.ok) {
-        status.innerText = 'Zarejestrowano! Możesz się zalogować.';
+      Toastify({
+        text: 'Zarejestrowano! Możesz się zalogować.',
+        duration: 3000,
+        gravity: "top",
+        position: "center",
+        backgroundColor: "#43a047", // zielony
+        stopOnFocus: true
+      }).showToast();
+      // Możesz tu wyczyścić formularz lub przełączyć na logowanie
+      e.target.reset();
       } else {
-        const data = await res.json();
-        status.innerText = data.error || 'Błąd rejestracji.';
+      const data = await res.json();
+      Toastify({
+        text: data.error || 'Błąd rejestracji.',
+        duration: 3000,
+        gravity: "top",
+        position: "center",
+        backgroundColor: "#d32f2f", // czerwony
+        stopOnFocus: true
+      }).showToast();
+      status.innerText = data.error || 'Błąd rejestracji.';
       }
     }
     catch (error) {
-      status.innerText = 'Błąd połączenia z serwerem.';
+      console.log('Błąd połączenia z serwerem.');
     }
     });
 }

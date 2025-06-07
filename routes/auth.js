@@ -124,13 +124,19 @@ router.post('/register',registerLimiter, async (req, res) => {
 
   // Sprawdź, czy wszystkie dane są podane
   if (!username || !password || !email) {
-    return res.status(400).json({ success: false, message: 'Wszystkie pola są wymagane.' });
+    return res.status(400).json({ success: false, error: 'Wszystkie pola są wymagane.' });
   }
 
   // Sprawdź, czy e-mail jest unikalny
   const [existingEmail] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
   if (existingEmail.length > 0) {
-    return res.status(409).json({ success: false, message: 'E-mail jest już zarejestrowany.' });
+    return res.status(409).json({ success: false, error: 'E-mail jest już zarejestrowany.' });
+  }
+
+  // Sprawdź, czy username jest unikalny
+  const [existingUsername] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+  if (existingUsername.length > 0) {
+    return res.status(409).json({ success: false, error: 'Nazwa użytkownika jest już zajęta.' });
   }
 
   // Hashowanie hasła
@@ -167,6 +173,7 @@ router.post('/login',loginLimiter, async (req, res) => {
 
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const { error } = require('console');
 
 /**
  * Trasa do generowania tokenu resetu hasła.
