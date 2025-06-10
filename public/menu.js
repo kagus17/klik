@@ -279,7 +279,7 @@ document.getElementById('show-history').addEventListener('click', async () => {
   document.getElementById('history-table').style.display = '';
 
 data.results.forEach(row => {
-    const points = row.matches * (100 - row.time_played);
+    const points = row.matches * (100 - row.time_played) + row.matches; // Oblicz punkty dla gracza
     const opponent = row.opponent_name || 'Brak';
 
   // Oblicz punkty przeciwnika tylko jeśli są dane
