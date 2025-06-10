@@ -200,7 +200,7 @@ document.getElementById('history-container').style.display = 'none'; // Ukryj hi
      * @returns {number} Obliczone punkty.
      */
 function calculatePoints(matches, time_played) {
-  return matches * (100-time_played);
+  return matches * (100-time_played) + matches; // Punkty = (matches * (100 - time_played)) + matches
 }
 
 /**
