@@ -33,6 +33,12 @@ const csurf = require('csurf');
 const rateLimit = require('express-rate-limit');
 
 /**
+ * Moduł do wczytywania zmiennych środowiskowych z pliki .env.
+ * @constant {Object} dotenv
+ */
+require('dotenv').config();
+
+/**
  * Konwertuje datę w formacie ISO na format MySQL DATETIME.
  * @function toMySQLDateTime
  * @param {string} dateString - Data w formacie ISO (np. "2025-05-28T12:00:00Z").
@@ -118,7 +124,7 @@ const sessionStore = new MySQLStore({
  * @description Konfiguruje sesje z użyciem magazynu MySQL i ciasteczek HTTP.
  */
 const sessionMiddleware = session({
-  secret: 'tajny-klucz',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: sessionStore, // <-- dodaj to
