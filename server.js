@@ -33,6 +33,12 @@ const csurf = require('csurf');
 const rateLimit = require('express-rate-limit');
 
 /**
+ * Moduł do wczytywania zmiennych środowiskowych z pliki .env.
+ * @constant {Object} dotenv
+ */
+require('dotenv').config();
+
+/**
  * Konwertuje datę w formacie ISO na format MySQL DATETIME.
  * @function toMySQLDateTime
  * @param {string} dateString - Data w formacie ISO (np. "2025-05-28T12:00:00Z").
@@ -118,7 +124,7 @@ const sessionStore = new MySQLStore({
  * @description Konfiguruje sesje z użyciem magazynu MySQL i ciasteczek HTTP.
  */
 const sessionMiddleware = session({
-  secret: 'tajny-klucz',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: sessionStore, // <-- dodaj to
@@ -275,7 +281,7 @@ if (room.kicked && room.kicked.includes(username)) {
     io.to(roomCode).emit('game-start', { difficulty: rooms[roomCode].difficulty });
 
     // Rozpocznij odliczanie czasu gry
-    if (rooms[roomCode].interval) {
+    /*if (rooms[roomCode].interval) {
   clearInterval(rooms[roomCode].interval);
   }
     rooms[roomCode].interval = setInterval(() => {
@@ -286,7 +292,7 @@ if (room.kicked && room.kicked.includes(username)) {
         clearInterval(rooms[roomCode].interval);
         io.to(roomCode).emit('game-ended');
       }
-    }, 1000);
+    }, 1000);*/
 
   }
 
@@ -376,7 +382,7 @@ if (room.kicked && room.kicked.includes(username)) {
    * @event disconnect
    * @description Usuwa gracza z pokoju i powiadamia drugiego gracza o rozłączeniu.
    */
- socket.on('disconnect', () => {
+ socket.on('disconnect', async () => {
   for (const roomCode in rooms) {
     const room = rooms[roomCode];
     // Dodaj username do listy wyrzuconych
@@ -390,7 +396,18 @@ if (room.kicked && room.kicked.includes(username)) {
 
     // Powiadom drugiego gracza
     io.to(roomCode).emit('opponent-disconnected');
-    // NIE usuwaj pokoju!
+    // Jeśli po rozłączeniu nie ma już żadnych graczy w pokoju, usuń pokój z bazy i z obiektu
+    if (room.players.length === 0) {
+      try {
+        // Usuń pokój z bazy danych
+        await db.query('DELETE FROM rooms WHERE code = ?', [roomCode]);
+        // Usuń pokój z obiektu rooms
+        delete rooms[roomCode];
+        console.log(`Pokój ${roomCode} został usunięty z bazy i z pamięci.`);
+      } catch (err) {
+        console.error(`Błąd przy usuwaniu pokoju ${roomCode}:`, err);
+      }
+    }
   }
 });
 });
@@ -469,6 +486,18 @@ const { create } = require('domain');
  */
 app.post('/game/save-result', async (req, res) => {
     const { playerName, roomCode, flips, timePlayed, matches, difficulty, startTime, endTime } = req.body;
+
+   // Dodaj tę weryfikację:
+    if (timePlayed > 100) {
+        return res.status(400).json({ error: 'Czas gry przekroczył dozwolony limit.' });
+    }
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const diffSeconds = Math.round((end - start) / 1000);
+
+    if (diffSeconds > 100) {
+        return res.status(400).json({ error: 'Czas gry przekroczył dozwolony limit.' });
+    }
 
     try {
         const [room] = await db.query('SELECT id FROM rooms WHERE code = ?', [roomCode]);

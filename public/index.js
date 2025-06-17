@@ -156,7 +156,7 @@ const status = document.getElementById('status');
       }
     }
     catch (error) {
-      status.innerText = 'Błąd połączenia z serwerem.';
+      console.log('Błąd połączenia z serwerem.');
     }
     });
 }
