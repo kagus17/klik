@@ -18,7 +18,7 @@
     }
 
     .background{
-    height: 500px;
+    height: 550px;
     width: 420px;
     max-width: 420px;
     background: transparent;
@@ -37,6 +37,9 @@
     
       .input-space{
         position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
         width: 82%;
         height: 50px;
         margin: 30px 35px;
