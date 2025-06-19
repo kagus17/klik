@@ -51,11 +51,6 @@
       position: relative;
       }
 
-      /* Pole hasła zajmuje całą szerokość, ikona tylko tyle ile trzeba */
-.input-space .password-row input[type="password"] {
-  flex: 1;
-  margin-right: 8px;
-}
 
 /* Ikona oka */
 .input-space .password-row a {
