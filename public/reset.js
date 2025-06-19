@@ -74,9 +74,8 @@
           duration: 4000,
           gravity: "top",
           position: "center",
-          backgroundColor: "#ffd600", // żółty
           stopOnFocus: true,
-          style: { color: "#222" }
+          style: { color: "#222", background: "#ffd600" }
         }).showToast();
         return;
       }
@@ -88,9 +87,8 @@
           duration: 4000,
           gravity: "top",
           position: "center",
-          backgroundColor: "#ffd600",
           stopOnFocus: true,
-          style: { color: "#222" }
+          style: { color: "#222", background: "#ffd600" }
         }).showToast();
         return;
       }
@@ -102,9 +100,8 @@
           duration: 6000,
           gravity: "top",
           position: "center",
-          backgroundColor: "#ffd600",
           stopOnFocus: true,
-          style: { color: "#222" }
+          style: { color: "#222", background: "#ffd600" }
         }).showToast();
         return;
       }
@@ -126,8 +123,8 @@
           duration: 4000,
           gravity: "top",
           position: "center",
-          backgroundColor: "#43a047", // zielony
-          stopOnFocus: true
+          stopOnFocus: true,
+          style: { background: "#43a047"}
         }).showToast();
       } else {
         Toastify({
@@ -135,8 +132,8 @@
           duration: 4000,
           gravity: "top",
           position: "center",
-          backgroundColor: "#d32f2f", // czerwony
-          stopOnFocus: true
+          stopOnFocus: true,
+          style: {background: "#d32f2f" }
         }).showToast();
       }
     });
