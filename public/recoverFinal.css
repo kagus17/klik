@@ -18,7 +18,7 @@
     }
 
     .background{
-    height: 500px;
+    height: 550px;
     width: 420px;
     max-width: 420px;
     background: transparent;
@@ -34,39 +34,59 @@
         font-size: 36px;
         text-align: center;
       }
-      
-      .background .input-space{
-        position: relative;
-        width: 80%;
-        height: 50px;
+    
+      .input-space{
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 82%;
+        height: auto;
         margin: 30px 35px;
       }
+
+      /* Ustaw pole hasła i ikonę w jednym wierszu */
+      .input-space .password-row {
+      display: flex;
+      align-items: center;
+      position: relative;
+      }
+
+
+/* Ikona oka */
+.input-space .password-row a {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-left: -38px; /* przesuwa ikonę na pole */
+  z-index: 2;
+  background: none;
+  border: none;
+}
+
+/* Opcjonalnie: zmniejsz szerokość ikony */
+.input-space .password-row img {
+  width: 28px;
+  height: 28px;
+}
       
       .input-space input{
-        box-shadow: inset 0 0 3px #CDCFD1;
-        width: 89%;
-        height: 100%;
-        background: transparent;
-        border: none;
-        outline: none;
-        border: 1px solid rgb(133, 133, 128);
-        border-radius: 40px;
-        font-size: 16px;
-        color: #CDCFD1;
-        padding: 20px 45px 20px 20px;
+            box-shadow: inset 0 0 3px #CDCFD1;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 1px solid rgb(133, 133, 128);
+    border-radius: 40px;
+    font-size: 16px;
+    color: #CDCFD1;
+    padding: 20px 45px 20px 20px;
       }
       
       .input-space input::placeholder{
         color: white;
       }
       
-      .input-space i{
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 20px;
-      }
     
       .input-space input:focus {
         background-color: rgba(255, 255, 255, 0.2);

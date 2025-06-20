@@ -1,4 +1,4 @@
-    /**
+/**
  * @file reset.js
  * @description Skrypt obsługujący formularz resetowania hasła, walidujący nowe hasło i wysyłający żądanie do serwera z tokenem resetowania.
  * @author KL, MF, DA, ŁW
@@ -65,26 +65,75 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       const newPassword = formData.get('newPassword');
+      const confirmPassword = formData.get('ConfirmPassword');
 
-      if (!validatePassword(newPassword)) {
-        status.innerText = 'Hasło musi mieć co najmniej 8 znaków, zawierać małą i wielką literę, cyfrę oraz znak specjalny.';
+      // Sprawdź czy oba pola są wypełnione
+      if (!newPassword || !confirmPassword) {
+        Toastify({
+          text: 'Wpisz oba pola hasła!',
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          stopOnFocus: true,
+          style: { color: "#222", background: "#ffd600" }
+        }).showToast();
         return;
       }
 
+      // Sprawdź czy hasła się zgadzają
+      if (newPassword !== confirmPassword) {
+        Toastify({
+          text: 'Hasła nie są takie same!',
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          stopOnFocus: true,
+          style: { color: "#222", background: "#ffd600" }
+        }).showToast();
+        return;
+      }
 
+      // Sprawdź siłę hasła
+      if (!validatePassword(newPassword)) {
+        Toastify({
+          text: 'Hasło musi mieć co najmniej 8 znaków, zawierać małą i wielką literę, cyfrę oraz znak specjalny.',
+          duration: 6000,
+          gravity: "top",
+          position: "center",
+          stopOnFocus: true,
+          style: { color: "#222", background: "#ffd600" }
+        }).showToast();
+        return;
+      }
+
+      // Jeśli wszystko OK, wyślij żądanie resetu
       const res = await fetch('/auth/reset-password', {
         method: 'POST',
         headers: {
-    'Content-Type': 'application/json',
-    'CSRF-Token': csrfToken
-  },
-  credentials: 'same-origin',
+          'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken
+        },
+        credentials: 'same-origin',
         body: JSON.stringify({ token, newPassword })
       });
 
       if (res.ok) {
-        status.innerText = 'Hasło zostało zresetowane!';
+        Toastify({
+          text: 'Hasło zostało zresetowane!',
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          stopOnFocus: true,
+          style: { background: "#43a047"}
+        }).showToast();
       } else {
-        status.innerText = 'Błąd resetu hasła.';
+        Toastify({
+          text: 'Błąd resetu hasła.',
+          duration: 4000,
+          gravity: "top",
+          position: "center",
+          stopOnFocus: true,
+          style: {background: "#d32f2f" }
+        }).showToast();
       }
     });

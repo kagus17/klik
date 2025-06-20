@@ -157,14 +157,14 @@ class MixOrMatch {
             };
             this.difficultyDisplay.innerText = `Poziom trudności: ${difficultyNamesPL[this.difficulty] || this.difficulty}`;
 
-            socket.on('time-update', ({ timeRemaining }) => {
+            /*socket.on('time-update', ({ timeRemaining }) => {
                 this.timeRemaining = timeRemaining;
                 this.timer.innerText = this.timeRemaining;
 
                 if (this.timeRemaining <= 0) {
                     this.gameOver();
                 }
-            });
+            });*/
             // Nasłuchuj nazwy przeciwnika i aktualizacji odwróceń
             socket.on('opponent-info', ({ opponentName }) => {
                 this.opponentNameDisplay.innerText = opponentName;
@@ -233,15 +233,17 @@ socket.on('time-up-results', ({ status }) => {
         this.hideCards();
         this.timer.innerText = this.timeRemaining;
         this.ticker.innerText = this.totalClicks;
+        this.startCountdown();
     }
     startCountdown() {
-        return /*setInterval(() => {
-            this.timeRemaining--;
-            this.timer.innerText = this.timeRemaining;
-            if(this.timeRemaining === 0)
-                this.gameOver();
-        }, 1000);*/
-        null
+        this.timerInterval = setInterval(() => {
+        this.timeRemaining--;
+        this.timer.innerText = this.timeRemaining;
+        if (this.timeRemaining <= 0) {
+            clearInterval(this.timerInterval);
+            this.gameOver();
+        }
+    }, 1000);
     }
 
     /**
@@ -325,6 +327,7 @@ socket.on('time-up-results', ({ status }) => {
     } else {
         document.getElementById('game-over-text').classList.add('visible');
     }
+    clearInterval(this.timerInterval);
 }
 
     /**
@@ -363,6 +366,7 @@ socket.on('time-up-results', ({ status }) => {
     } else {
         document.getElementById('victory-text').classList.add('visible');
     }
+    clearInterval(this.timerInterval);
     }
 
     /**
